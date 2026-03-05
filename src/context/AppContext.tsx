@@ -9,7 +9,7 @@ interface AppContextType {
   clients: Client[];
   addClient: (c: Client) => Promise<void>;
   services: Service[];
-  addService: (s: Service) => Promise<void>;
+  addService: (s: Partial<Service>) => Promise<void>;
   updateService: (id: string, s: Partial<Service>) => Promise<void>;
   prices: PriceItem[];
   updatePrice: (id: string, price: number) => void;
@@ -39,7 +39,6 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     { id: '4', nome: 'Tijolo baiano', unidade: 'unid.', preco: 0.8, categoria: 'Alvenaria' },
   ]);
 
-  // Carregar dados do Supabase quando o usuário logar
   useEffect(() => {
     if (!session?.user) return;
 
@@ -63,11 +62,11 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       
       if (clientsData) setClients(clientsData as any);
 
-      // Buscar Serviços
+      // Buscar Serviços (usando a coluna criadoEm que definimos no SQL)
       const { data: servicesData } = await supabase
         .from('services')
         .select('*')
-        .order('created_at', { ascending: false });
+        .order('criadoEm', { ascending: false });
       
       if (servicesData) setServices(servicesData as any);
 
@@ -88,7 +87,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     if (!error && data) setClients([data as any, ...clients]);
   };
 
-  const addService = async (s: Service) => {
+  const addService = async (s: Partial<Service>) => {
     if (!session?.user) return;
     const { data, error } = await supabase
       .from('services')
