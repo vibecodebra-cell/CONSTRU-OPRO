@@ -20,7 +20,7 @@ const Index = () => {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
         {/* Profession Cards */}
         <div 
-          onClick={() => navigate('/tools?tab=materiais')}
+          onClick={() => navigate('/login')}
           className="bento-card group border-amber/20 hover:border-amber"
         >
           <div className="inline-flex items-center gap-1.5 text-[11px] font-semibold tracking-wider uppercase text-amber bg-amber/10 border border-amber/20 rounded-full px-3.5 py-1.5 mb-6">
@@ -34,7 +34,7 @@ const Index = () => {
         </div>
 
         <div 
-          onClick={() => navigate('/tools?tab=orcamento')}
+          onClick={() => navigate('/login')}
           className="bento-card group border-electric/20 hover:border-electric"
         >
           <div className="inline-flex items-center gap-1.5 text-[11px] font-semibold tracking-wider uppercase text-electric bg-electric/10 border border-electric/20 rounded-full px-3.5 py-1.5 mb-6">
@@ -48,7 +48,7 @@ const Index = () => {
         </div>
 
         <div 
-          onClick={() => navigate('/tools?tab=tempo')}
+          onClick={() => navigate('/login')}
           className="bento-card group border-success/20 hover:border-success"
         >
           <div className="inline-flex items-center gap-1.5 text-[11px] font-semibold tracking-wider uppercase text-success bg-success/10 border border-success/20 rounded-full px-3.5 py-1.5 mb-6">

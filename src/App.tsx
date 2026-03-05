@@ -6,7 +6,6 @@ import Layout from './components/Layout';
 import Dashboard from './pages/Dashboard';
 import NewService from './pages/NewService';
 import Proposals from './pages/Proposals';
-import Tools from './pages/Tools';
 import Index from './pages/Index';
 import Login from './pages/Login';
 
@@ -33,12 +32,6 @@ function App() {
             <Route path="/dashboard" element={
               <ProtectedRoute>
                 <Layout><Dashboard /></Layout>
-              </ProtectedRoute>
-            } />
-            
-            <Route path="/tools" element={
-              <ProtectedRoute>
-                <Layout><Tools /></Layout>
               </ProtectedRoute>
             } />
             
