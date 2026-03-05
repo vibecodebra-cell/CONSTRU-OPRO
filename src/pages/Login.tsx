@@ -49,7 +49,6 @@ const Login = () => {
                 password_label: 'Senha',
                 button_label: 'Entrar',
                 loading_button_label: 'Entrando...',
-                social_provider_text: 'Entrar com {{provider}}',
                 link_text: 'Já tem uma conta? Entre',
               },
               sign_up: {
