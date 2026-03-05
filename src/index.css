@@ -1,0 +1,27 @@
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@700;800&family=DM+Sans:wght@300;400;500;600&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    @apply bg-ink text-[#F1F5F9] font-dmsans antialiased;
+  }
+}
+
+.glass-topbar {
+  @apply sticky top-0 z-[200] bg-ink/85 backdrop-blur-xl border-b border-rim;
+}
+
+.bento-card {
+  @apply bg-surface border border-rim rounded-r-xl p-7 cursor-pointer transition-all duration-200 relative overflow-hidden hover:-translate-y-1 hover:shadow-2xl;
+}
+
+.finput {
+  @apply w-full bg-ink-tertiary border border-rim rounded-r-md px-3.5 py-2.5 text-[#F1F5F9] outline-none transition-all focus:border-amber focus:ring-4 focus:ring-amber/10;
+}
+
+.btn-amber {
+  @apply flex items-center justify-center gap-2 w-full bg-amber text-black font-montserrat font-bold text-sm uppercase py-3.5 rounded-r-md transition-all hover:bg-amber-hover hover:-translate-y-0.5 active:scale-[0.98] shadow-lg shadow-amber/20;
+}
