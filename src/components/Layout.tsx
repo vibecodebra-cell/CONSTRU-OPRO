@@ -19,33 +19,34 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
 
   return (
     <div className="min-h-screen flex flex-col">
-      <header className="glass-topbar h-16 px-6 flex items-center gap-3">
-        <div className="bg-amber p-1.5 rounded-lg">
+      <header className="glass-topbar h-18 px-6 flex items-center gap-4">
+        <div className="bg-amber p-2 rounded-lg shadow-amber-glow">
           <Plus className="w-5 h-5 text-black" strokeWidth={3} />
         </div>
         <span className="font-montserrat font-extrabold text-xl tracking-tight">
           CONSTRUTOR <em className="text-amber not-italic">PRO</em>
         </span>
-        <span className="text-[10px] font-semibold tracking-widest uppercase text-amber bg-amber/10 border border-amber/25 rounded-full px-2 py-0.5">
+        <span className="text-[10px] font-bold tracking-widest uppercase text-amber bg-amber/10 border border-amber/25 rounded-full px-2.5 py-1">
           Beta
         </span>
         
-        <nav className="ml-auto flex gap-0.5">
+        <nav className="ml-auto flex gap-1" role="navigation">
           {navItems.map((item) => {
             const isActive = location.pathname === item.path;
             return (
               <Link
                 key={item.path}
                 to={item.path}
+                aria-current={isActive ? 'page' : undefined}
                 className={cn(
-                  "flex items-center gap-2 px-3.5 py-1.5 rounded-r-md text-[13.5px] font-medium transition-colors",
+                  "flex items-center gap-2 px-4 py-2 rounded-r-md text-[13.5px] font-semibold transition-all",
                   isActive 
-                    ? "text-amber bg-amber/10" 
-                    : "text-[#94A3B8] hover:text-[#F1F5F9] hover:bg-ink-tertiary"
+                    ? "text-black bg-amber shadow-amber-glow" 
+                    : "text-t-2 hover:text-t-1 hover:bg-ink-tertiary"
                 )}
               >
                 <item.icon className="w-4 h-4" />
-                {item.label}
+                <span className="hidden sm:inline">{item.label}</span>
               </Link>
             );
           })}

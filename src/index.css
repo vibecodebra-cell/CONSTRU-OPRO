@@ -6,22 +6,64 @@
 
 @layer base {
   body {
-    @apply bg-ink text-[#F1F5F9] font-dmsans antialiased;
+    @apply bg-ink text-t-1 font-dmsans antialiased selection:bg-amber/30;
+  }
+
+  :focus-visible {
+    @apply outline-none ring-2 ring-amber ring-offset-2 ring-offset-ink;
   }
 }
 
-.glass-topbar {
-  @apply sticky top-0 z-[200] bg-ink/85 backdrop-blur-xl border-b border-rim;
+@layer components {
+  .glass-topbar {
+    @apply sticky top-0 z-[200] bg-ink/85 backdrop-blur-xl border-b border-rim;
+  }
+
+  .bento-card {
+    @apply bg-surface border border-rim rounded-r-xl p-7 cursor-pointer transition-all duration-200 relative overflow-hidden hover:-translate-y-1 hover:shadow-pop;
+  }
+
+  .finput {
+    @apply w-full bg-ink-tertiary border border-rim rounded-r-md px-4 py-3.5 text-t-1 font-dmsans text-[15px] outline-none transition-all focus:border-amber focus:ring-4 focus:ring-amber/10 placeholder:text-t-3;
+  }
+
+  .btn-amber {
+    @apply flex items-center justify-center gap-2 w-full bg-amber text-black font-montserrat font-bold text-sm uppercase tracking-[0.5px] py-4 rounded-r-md transition-all hover:bg-amber-hover hover:-translate-y-0.5 active:scale-[0.98] shadow-amber-glow;
+  }
+
+  .btn-blue {
+    @apply flex items-center justify-center gap-2 w-full bg-electric text-white font-montserrat font-bold text-sm uppercase tracking-[0.5px] py-4 rounded-r-md transition-all hover:bg-electric-hover hover:-translate-y-0.5 active:scale-[0.98] shadow-lg shadow-electric/20;
+  }
+
+  .btn-ghost {
+    @apply flex items-center justify-center gap-2 w-full bg-ink-tertiary border border-rim text-t-2 font-montserrat font-bold text-sm uppercase tracking-[0.5px] py-4 rounded-r-md transition-all hover:text-t-1 hover:border-rim-secondary hover:-translate-y-0.5;
+  }
 }
 
-.bento-card {
-  @apply bg-surface border border-rim rounded-r-xl p-7 cursor-pointer transition-all duration-200 relative overflow-hidden hover:-translate-y-1 hover:shadow-2xl;
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 5px;
+}
+::-webkit-scrollbar-track {
+  @apply bg-ink;
+}
+::-webkit-scrollbar-thumb {
+  @apply bg-rim-secondary rounded-full;
+}
+::-webkit-scrollbar-thumb:hover {
+  @apply bg-amber;
 }
 
-.finput {
-  @apply w-full bg-ink-tertiary border border-rim rounded-r-md px-3.5 py-2.5 text-[#F1F5F9] outline-none transition-all focus:border-amber focus:ring-4 focus:ring-amber/10;
+/* Animations */
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
-.btn-amber {
-  @apply flex items-center justify-center gap-2 w-full bg-amber text-black font-montserrat font-bold text-sm uppercase py-3.5 rounded-r-md transition-all hover:bg-amber-hover hover:-translate-y-0.5 active:scale-[0.98] shadow-lg shadow-amber/20;
+.animate-fade-up {
+  animation: fadeUp 0.3s ease forwards;
+}
+
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
 }
