@@ -19,7 +19,7 @@ const MaterialCalculator = () => {
   };
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-5 animate-fade-up">
       <div className="bg-surface border border-rim rounded-r-xl p-7">
         <div className="flex items-center gap-2.5 font-montserrat font-bold text-base mb-6">
           <div className="w-2 h-2 bg-amber rounded-full shadow-[0_0_8px_#F59E0B]" />
@@ -27,7 +27,7 @@ const MaterialCalculator = () => {
         </div>
         <div className="space-y-4.5">
           <div>
-            <label className="block text-[11.5px] font-semibold tracking-wider uppercase text-[#94A3B8] mb-2">Tipo de serviço</label>
+            <label className="block text-[11.5px] font-semibold tracking-wider uppercase text-t-2 mb-2">Tipo de serviço</label>
             <select 
               value={type}
               onChange={(e) => setType(e.target.value)}
@@ -40,11 +40,11 @@ const MaterialCalculator = () => {
             </select>
           </div>
           <div>
-            <label className="block text-[11.5px] font-semibold tracking-wider uppercase text-[#94A3B8] mb-2">Área (m²)</label>
+            <label className="block text-[11.5px] font-semibold tracking-wider uppercase text-t-2 mb-2">Área (m²)</label>
             <input type="number" value={area} onChange={(e) => setArea(+e.target.value)} className="finput" />
           </div>
           <div>
-            <label className="block text-[11.5px] font-semibold tracking-wider uppercase text-[#94A3B8] mb-2">Margem de perda (%)</label>
+            <label className="block text-[11.5px] font-semibold tracking-wider uppercase text-t-2 mb-2">Margem de perda (%)</label>
             <input type="number" value={perda} onChange={(e) => setPerda(+e.target.value)} className="finput" />
           </div>
           <button onClick={calculate} className="btn-amber mt-2">
@@ -63,14 +63,14 @@ const MaterialCalculator = () => {
             {results.map(([icon, name, qty, unit], i) => (
               <div key={i} className="flex items-center gap-3 bg-ink-tertiary border border-rim rounded-r-sm p-3 transition-colors hover:border-rim-secondary">
                 <span className="text-lg w-7 text-center">{icon}</span>
-                <span className="flex-1 text-sm text-[#94A3B8]">{name}</span>
+                <span className="flex-1 text-sm text-t-2">{name}</span>
                 <span className="font-semibold text-base text-amber">{qty}</span>
-                <span className="text-xs text-[#4B5669]">{unit}</span>
+                <span className="text-xs text-t-3">{unit}</span>
               </div>
             ))}
           </div>
         ) : (
-          <p className="text-[#4B5669] text-sm leading-relaxed py-3">Preencha os campos ao lado e clique em <strong>Calcular</strong>.</p>
+          <p className="text-t-3 text-sm leading-relaxed py-3">Preencha os campos ao lado e clique em <strong>Calcular</strong>.</p>
         )}
       </div>
     </div>
