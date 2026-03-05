@@ -6,6 +6,8 @@ import Layout from './components/Layout';
 import Dashboard from './pages/Dashboard';
 import NewService from './pages/NewService';
 import Proposals from './pages/Proposals';
+import Tools from './pages/Tools';
+import Index from './pages/Index';
 import Login from './pages/Login';
 
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
@@ -23,27 +25,41 @@ function App() {
       <AppProvider>
         <Router future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
           <Routes>
+            {/* Rota pública da landing page */}
+            <Route path="/" element={<Index />} />
+            
             <Route path="/login" element={<Login />} />
-            <Route path="/" element={
+            
+            <Route path="/dashboard" element={
               <ProtectedRoute>
                 <Layout><Dashboard /></Layout>
               </ProtectedRoute>
             } />
+            
+            <Route path="/tools" element={
+              <ProtectedRoute>
+                <Layout><Tools /></Layout>
+              </ProtectedRoute>
+            } />
+            
             <Route path="/new" element={
               <ProtectedRoute>
                 <Layout><NewService /></Layout>
               </ProtectedRoute>
             } />
+            
             <Route path="/proposals" element={
               <ProtectedRoute>
                 <Layout><Proposals /></Layout>
               </ProtectedRoute>
             } />
+            
             <Route path="/clients" element={
               <ProtectedRoute>
                 <Layout><div className="p-10 text-center text-t-2">Tela de Clientes em desenvolvimento...</div></Layout>
               </ProtectedRoute>
             } />
+            
             <Route path="/settings" element={
               <ProtectedRoute>
                 <Layout><div className="p-10 text-center text-t-2">Tela de Configurações em desenvolvimento...</div></Layout>

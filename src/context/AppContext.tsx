@@ -20,7 +20,7 @@ const AppContext = createContext<AppContextType | undefined>(undefined);
 
 export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { session } = useAuth();
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [profile, setProfile] = useState<UserProfile>({ 
     nome: 'Profissional', 
     profissao: 'pedreiro', 
@@ -40,37 +40,43 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   ]);
 
   useEffect(() => {
-    if (!session?.user) return;
+    if (!session?.user) {
+      setLoading(false);
+      return;
+    }
 
     const fetchData = async () => {
       setLoading(true);
-      
-      // Buscar Perfil
-      const { data: profileData } = await supabase
-        .from('profiles')
-        .select('*')
-        .eq('id', session.user.id)
-        .single();
-      
-      if (profileData) setProfile(profileData as any);
+      try {
+        // Buscar Perfil
+        const { data: profileData } = await supabase
+          .from('profiles')
+          .select('*')
+          .eq('id', session.user.id)
+          .maybeSingle();
+        
+        if (profileData) setProfile(profileData as any);
 
-      // Buscar Clientes
-      const { data: clientsData } = await supabase
-        .from('clients')
-        .select('*')
-        .order('created_at', { ascending: false });
-      
-      if (clientsData) setClients(clientsData as any);
+        // Buscar Clientes
+        const { data: clientsData } = await supabase
+          .from('clients')
+          .select('*')
+          .order('created_at', { ascending: false });
+        
+        if (clientsData) setClients(clientsData as any);
 
-      // Buscar Serviços (usando a coluna criadoEm que definimos no SQL)
-      const { data: servicesData } = await supabase
-        .from('services')
-        .select('*')
-        .order('criadoEm', { ascending: false });
-      
-      if (servicesData) setServices(servicesData as any);
-
-      setLoading(false);
+        // Buscar Serviços
+        const { data: servicesData } = await supabase
+          .from('services')
+          .select('*')
+          .order('criadoEm', { ascending: false });
+        
+        if (servicesData) setServices(servicesData as any);
+      } catch (err) {
+        console.error("Erro ao carregar dados:", err);
+      } finally {
+        setLoading(false);
+      }
     };
 
     fetchData();

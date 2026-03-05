@@ -1,10 +1,21 @@
-import React from 'react';
+import React, { useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Auth } from '@supabase/auth-ui-react';
 import { ThemeSupa } from '@supabase/auth-ui-shared';
 import { supabase } from '../integrations/supabase/client';
+import { useAuth } from '../components/AuthProvider';
 import { Hammer } from 'lucide-react';
 
 const Login = () => {
+  const { session } = useAuth();
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (session) {
+      navigate('/dashboard');
+    }
+  }, [session, navigate]);
+
   return (
     <div className="min-h-screen bg-ink flex items-center justify-center p-6">
       <div className="w-full max-w-[420px] bg-surface border border-rim rounded-r-xl p-8 shadow-pop">
