@@ -24,12 +24,11 @@ export class TourEngine {
   private onSkip: () => void;
   private storageKey: string;
 
-  private $overlay: HTMLElement | null = null;
   private $hole: HTMLElement | null = null;
   private $tooltip: HTMLElement | null = null;
-  private $backdrop: HTMLElement | null = null;
   private _currentTarget: HTMLElement | null = null;
   private _currentHandler: ((e: MouseEvent) => void) | null = null;
+  private _globalInterceptor: ((e: MouseEvent) => void) | null = null;
 
   constructor(steps: TourStep[], options: TourOptions = {}) {
     this.steps = steps;
@@ -48,25 +47,52 @@ export class TourEngine {
     this.active = true;
     this.current = 0;
     this._buildDOM();
+    this._setupInterceptor();
     this._applyStep(0);
     window.addEventListener('resize', this._onResize);
   }
 
   private _buildDOM() {
-    this.$backdrop = document.createElement('div');
-    this.$backdrop.className = 'tour-backdrop';
-    this.$backdrop.addEventListener('click', () => this._handleWrongClick());
-
+    // O Hole agora serve como o overlay escuro usando box-shadow gigante
     this.$hole = document.createElement('div');
     this.$hole.className = 'tour-hole';
+    this.$hole.style.pointerEvents = 'none'; // Permite que cliques passem através dele
 
     this.$tooltip = document.createElement('div');
     this.$tooltip.className = 'tour-tooltip';
 
-    document.body.appendChild(this.$backdrop);
     document.body.appendChild(this.$hole);
     document.body.appendChild(this.$tooltip);
     document.body.style.overflow = 'hidden';
+  }
+
+  private _setupInterceptor() {
+    // Intercepta cliques em toda a janela na fase de captura
+    this._globalInterceptor = (e: MouseEvent) => {
+      if (!this.active || !this._currentTarget) return;
+
+      const rect = this._currentTarget.getBoundingClientRect();
+      const pad = 15; // Margem de erro para o clique
+      
+      const isInside = (
+        e.clientX >= rect.left - pad &&
+        e.clientX <= rect.right + pad &&
+        e.clientY >= rect.top - pad &&
+        e.clientY <= rect.bottom + pad
+      );
+
+      // Se o clique for fora do elemento alvo, bloqueia e mostra erro
+      if (!isInside) {
+        // Permite cliques apenas nos botões internos do tooltip (como "Pular")
+        if (this.$tooltip?.contains(e.target as Node)) return;
+
+        e.preventDefault();
+        e.stopPropagation();
+        this._handleWrongClick();
+      }
+    };
+
+    window.addEventListener('click', this._globalInterceptor, true);
   }
 
   private _applyStep(index: number) {
@@ -94,8 +120,7 @@ export class TourEngine {
       this._advance();
     };
 
-    target.style.position = target.style.position || 'relative';
-    target.style.zIndex = '9002';
+    // Não precisamos mais de z-index alto pois não há backdrop físico bloqueando
     target.addEventListener('click', this._currentHandler as any, { once: true });
   }
 
@@ -103,7 +128,6 @@ export class TourEngine {
     if (this._currentTarget && this._currentHandler) {
       this._currentTarget.removeEventListener('click', this._currentHandler as any);
       this._currentTarget.removeAttribute('data-tour-target');
-      this._currentTarget.style.zIndex = '';
       this._currentTarget = null;
       this._currentHandler = null;
     }
@@ -155,9 +179,11 @@ export class TourEngine {
   }
 
   private _destroyDOM() {
-    this.$backdrop?.remove();
     this.$hole?.remove();
     this.$tooltip?.remove();
+    if (this._globalInterceptor) {
+      window.removeEventListener('click', this._globalInterceptor, true);
+    }
     document.body.style.overflow = '';
     window.removeEventListener('resize', this._onResize);
   }
@@ -174,6 +200,9 @@ export class TourEngine {
       width: (rect.width + pad * 2) + 'px',
       height: (rect.height + pad * 2) + 'px',
       borderRadius: radius,
+      boxShadow: '0 0 0 9999px rgba(0, 0, 0, 0.78)',
+      border: '2px solid #F59E0B',
+      zIndex: '9001'
     });
   }
 
@@ -206,12 +235,16 @@ export class TourEngine {
     `;
 
     const skipBtn = this.$tooltip.querySelector('.tour-skip-btn');
-    skipBtn?.addEventListener('click', () => this.skip());
+    skipBtn?.addEventListener('click', (e) => {
+      e.stopPropagation();
+      this.skip();
+    });
 
     const pos = this._calcTooltipPos(rect);
     Object.assign(this.$tooltip.style, {
       top: pos.top + 'px',
       left: pos.left + 'px',
+      zIndex: '9003'
     });
     this.$tooltip.setAttribute('data-dir', pos.dir);
   }
