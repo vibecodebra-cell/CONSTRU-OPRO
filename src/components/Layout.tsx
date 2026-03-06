@@ -1,10 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { LayoutDashboard, PlusCircle, Users, History, Settings, Hammer, HelpCircle } from 'lucide-react';
+import { LayoutDashboard, PlusCircle, Users, History, Settings, Hammer, HelpCircle, Menu } from 'lucide-react';
 import { clsx, type ClassValue } from 'clsx';
 import { twMerge } from 'tailwind-merge';
 import { TourEngine } from '../utils/TourEngine';
 import { tourPrimeiroOrcamento, tourCadastrarCliente } from '../constants/tours';
+import MobileMenu from './MobileMenu';
 
 function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -14,6 +15,7 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const location = useLocation();
   const navigate = useNavigate();
   const [hasTour, setHasTour] = useState(false);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   const navItems = [
     { path: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
@@ -71,17 +73,27 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
 
   return (
     <div className="min-h-screen flex flex-col">
-      <header className="glass-topbar h-18 px-6 flex items-center gap-4">
-        <Link to="/" className="flex items-center gap-3 mr-8 hover:opacity-80 transition-opacity">
+      <header className="glass-topbar h-18 px-4 sm:px-6 flex items-center gap-4">
+        {/* Hamburger Button - Mobile Only */}
+        <button 
+          onClick={() => setIsMobileMenuOpen(true)}
+          className="sm:hidden p-2 text-t-2 hover:text-t-1 transition-colors"
+          aria-label="Abrir menu"
+        >
+          <Menu className="w-6 h-6" />
+        </button>
+
+        <Link to="/" className="flex items-center gap-3 mr-4 sm:mr-8 hover:opacity-80 transition-opacity">
           <div className="bg-amber p-2 rounded-lg shadow-amber-glow">
             <Hammer className="w-5 h-5 text-black" strokeWidth={3} />
           </div>
-          <span className="font-montserrat font-extrabold text-xl tracking-tighter hidden sm:inline">
+          <span className="font-montserrat font-extrabold text-xl tracking-tighter hidden xs:inline">
             CONSTRUTOR <em className="text-amber not-italic">PRO</em>
           </span>
         </Link>
 
-        <nav className="flex gap-1" role="navigation">
+        {/* Desktop Nav */}
+        <nav className="hidden sm:flex gap-1" role="navigation">
           {navItems.map((item) => {
             const isActive = location.pathname === item.path;
             return (
@@ -104,6 +116,7 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
         </nav>
 
         <div className="ml-auto flex items-center gap-4">
+          {/* Desktop Button */}
           <button 
             onClick={() => navigate('/new')}
             className="topbar-btn-novo hidden sm:flex items-center gap-2 bg-amber text-black font-montserrat font-extrabold text-[11px] uppercase tracking-widest px-5 py-2.5 rounded-r-md transition-all hover:bg-amber-hover hover:-translate-y-0.5 shadow-amber-glow"
@@ -116,7 +129,14 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
         </div>
       </header>
 
-      <main className="flex-1">
+      {/* Mobile Menu Drawer */}
+      <MobileMenu 
+        isOpen={isMobileMenuOpen} 
+        onClose={() => setIsMobileMenuOpen(false)} 
+        navItems={navItems}
+      />
+
+      <main className="flex-1 pb-20 sm:pb-0">
         {children}
       </main>
 
@@ -130,7 +150,7 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
         <HelpCircle className="w-6 h-6" />
       </button>
 
-      {/* Mobile Bottom Nav */}
+      {/* Mobile Bottom Nav - Mantido como atalho rápido, mas o hambúrguer agora tem tudo */}
       <nav className="sm:hidden fixed bottom-0 left-0 w-full bg-ink-secondary border-t border-rim px-6 py-3 flex justify-between items-center z-[300]">
         {navItems.map((item) => (
           <Link key={item.path} to={item.path} className={cn("p-2", location.pathname === item.path ? "text-amber" : "text-t-2")}>
