@@ -2,7 +2,7 @@ import { TourStep } from '../utils/TourEngine';
 
 export const tourPrimeiroOrcamento: TourStep[] = [
   {
-    target: '.topbar-btn-novo',
+    target: ['.topbar-btn-novo', '.mobile-btn-novo'],
     title: 'Comece aqui',
     desc: 'Este botão inicia um novo orçamento. Toque nele agora.',
     cta: 'Toque no botão laranja',

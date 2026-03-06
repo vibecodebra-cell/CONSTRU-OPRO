@@ -150,14 +150,14 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
         <HelpCircle className="w-6 h-6" />
       </button>
 
-      {/* Mobile Bottom Nav - Mantido como atalho rápido, mas o hambúrguer agora tem tudo */}
+      {/* Mobile Bottom Nav */}
       <nav className="sm:hidden fixed bottom-0 left-0 w-full bg-ink-secondary border-t border-rim px-6 py-3 flex justify-between items-center z-[300]">
         {navItems.map((item) => (
           <Link key={item.path} to={item.path} className={cn("p-2", location.pathname === item.path ? "text-amber" : "text-t-2")}>
             <item.icon className="w-6 h-6" />
           </Link>
         ))}
-        <Link to="/new" className="bg-amber p-3 rounded-full -mt-12 shadow-amber-glow text-black">
+        <Link to="/new" className="mobile-btn-novo bg-amber p-3 rounded-full -mt-12 shadow-amber-glow text-black">
           <PlusCircle className="w-7 h-7" />
         </Link>
       </nav>

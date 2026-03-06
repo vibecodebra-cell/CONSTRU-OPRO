@@ -1,5 +1,5 @@
 export interface TourStep {
-  target: string;
+  target: string | string[];
   title: string;
   desc: string;
   cta?: string;
@@ -53,10 +53,9 @@ export class TourEngine {
   }
 
   private _buildDOM() {
-    // O Hole agora serve como o overlay escuro usando box-shadow gigante
     this.$hole = document.createElement('div');
     this.$hole.className = 'tour-hole';
-    this.$hole.style.pointerEvents = 'none'; // Permite que cliques passem através dele
+    this.$hole.style.pointerEvents = 'none';
 
     this.$tooltip = document.createElement('div');
     this.$tooltip.className = 'tour-tooltip';
@@ -67,12 +66,11 @@ export class TourEngine {
   }
 
   private _setupInterceptor() {
-    // Intercepta cliques em toda a janela na fase de captura
     this._globalInterceptor = (e: MouseEvent) => {
       if (!this.active || !this._currentTarget) return;
 
       const rect = this._currentTarget.getBoundingClientRect();
-      const pad = 15; // Margem de erro para o clique
+      const pad = 15;
       
       const isInside = (
         e.clientX >= rect.left - pad &&
@@ -81,9 +79,7 @@ export class TourEngine {
         e.clientY <= rect.bottom + pad
       );
 
-      // Se o clique for fora do elemento alvo, bloqueia e mostra erro
       if (!isInside) {
-        // Permite cliques apenas nos botões internos do tooltip (como "Pular")
         if (this.$tooltip?.contains(e.target as Node)) return;
 
         e.preventDefault();
@@ -97,11 +93,26 @@ export class TourEngine {
 
   private _applyStep(index: number) {
     const step = this.steps[index];
-    const target = document.querySelector(step.target) as HTMLElement;
+    let target: HTMLElement | null = null;
+
+    // Suporte a múltiplos seletores (tenta encontrar o primeiro visível)
+    const selectors = Array.isArray(step.target) ? step.target : [step.target];
+    for (const selector of selectors) {
+      const el = document.querySelector(selector) as HTMLElement;
+      if (el && el.offsetParent !== null) { // Verifica se o elemento está visível
+        target = el;
+        break;
+      }
+    }
 
     if (!target) {
-      console.warn(`[TourEngine] Target não encontrado: ${step.target}`);
-      this._advance();
+      console.warn(`[TourEngine] Target não encontrado ou invisível: ${step.target}`);
+      if (index < this.steps.length - 1) {
+        this.current++;
+        this._applyStep(this.current);
+      } else {
+        this._complete();
+      }
       return;
     }
 
@@ -120,7 +131,6 @@ export class TourEngine {
       this._advance();
     };
 
-    // Não precisamos mais de z-index alto pois não há backdrop físico bloqueando
     target.addEventListener('click', this._currentHandler as any, { once: true });
   }
 
@@ -260,6 +270,11 @@ export class TourEngine {
     let top = rect.bottom + GAP;
     let left = rect.left + rect.width / 2 - TW / 2;
 
+    // Se for mobile, centraliza e fixa embaixo
+    if (vw < 640) {
+      return { top: vh - TH - 20, left: (vw - TW) / 2, dir: 'none' };
+    }
+
     if (top + TH > vh) {
       dir = 'top';
       top = rect.top - TH - GAP;
@@ -283,7 +298,15 @@ export class TourEngine {
   private _onResize() {
     if (!this.active || this.current === -1) return;
     const step = this.steps[this.current];
-    const target = document.querySelector(step.target) as HTMLElement;
+    let target: HTMLElement | null = null;
+    const selectors = Array.isArray(step.target) ? step.target : [step.target];
+    for (const selector of selectors) {
+      const el = document.querySelector(selector) as HTMLElement;
+      if (el && el.offsetParent !== null) {
+        target = el;
+        break;
+      }
+    }
     if (target) {
       this._positionHole(target, step);
       this._positionTooltip(target, step, this.current);
