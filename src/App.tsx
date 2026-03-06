@@ -6,6 +6,8 @@ import Layout from './components/Layout';
 import Dashboard from './pages/Dashboard';
 import NewService from './pages/NewService';
 import Proposals from './pages/Proposals';
+import Clients from './pages/Clients';
+import Settings from './pages/Settings';
 import Index from './pages/Index';
 import Login from './pages/Login';
 
@@ -24,9 +26,7 @@ function App() {
       <AppProvider>
         <Router future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
           <Routes>
-            {/* Rota pública da landing page */}
             <Route path="/" element={<Index />} />
-            
             <Route path="/login" element={<Login />} />
             
             <Route path="/dashboard" element={
@@ -49,13 +49,13 @@ function App() {
             
             <Route path="/clients" element={
               <ProtectedRoute>
-                <Layout><div className="p-10 text-center text-t-2">Tela de Clientes em desenvolvimento...</div></Layout>
+                <Layout><Clients /></Layout>
               </ProtectedRoute>
             } />
             
             <Route path="/settings" element={
               <ProtectedRoute>
-                <Layout><div className="p-10 text-center text-t-2">Tela de Configurações em desenvolvimento...</div></Layout>
+                <Layout><Settings /></Layout>
               </ProtectedRoute>
             } />
           </Routes>
