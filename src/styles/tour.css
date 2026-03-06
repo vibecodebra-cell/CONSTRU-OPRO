@@ -266,6 +266,13 @@
   50%     { transform: scale(1.3); }
 }
 
+@media (max-width: 640px) {
+  .tour-fab {
+    bottom: 90px; /* Posiciona acima da barra de navegação inferior no mobile */
+    right: 20px;
+  }
+}
+
 @media (max-width: 480px) {
   .tour-tooltip {
     position: fixed !important;
