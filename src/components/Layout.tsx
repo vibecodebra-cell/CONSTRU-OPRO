@@ -1,8 +1,10 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { LayoutDashboard, PlusCircle, Users, History, Settings, Hammer } from 'lucide-react';
+import { LayoutDashboard, PlusCircle, Users, History, Settings, Hammer, HelpCircle } from 'lucide-react';
 import { clsx, type ClassValue } from 'clsx';
 import { twMerge } from 'tailwind-merge';
+import { TourEngine } from '../utils/TourEngine';
+import { tourPrimeiroOrcamento, tourCadastrarCliente } from '../constants/tours';
 
 function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -11,6 +13,7 @@ function cn(...inputs: ClassValue[]) {
 const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const location = useLocation();
   const navigate = useNavigate();
+  const [hasTour, setHasTour] = useState(false);
 
   const navItems = [
     { path: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
@@ -18,6 +21,53 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     { path: '/proposals', label: 'Histórico', icon: History },
     { path: '/settings', label: 'Config', icon: Settings },
   ];
+
+  useEffect(() => {
+    const checkTour = () => {
+      const path = location.pathname;
+      let tourSteps = null;
+      let key = '';
+
+      if (path === '/dashboard') {
+        tourSteps = tourPrimeiroOrcamento;
+        key = 'cpro_tour_orcamento_done';
+      } else if (path === '/clients') {
+        tourSteps = tourCadastrarCliente;
+        key = 'cpro_tour_cliente_done';
+      }
+
+      if (tourSteps && !localStorage.getItem(key)) {
+        setHasTour(true);
+        setTimeout(() => {
+          const tour = new TourEngine(tourSteps!, { storageKey: key });
+          tour.start();
+        }, 1000);
+      } else {
+        setHasTour(false);
+      }
+    };
+
+    checkTour();
+  }, [location.pathname]);
+
+  const handleHelpClick = () => {
+    const path = location.pathname;
+    let tourSteps = null;
+    let key = '';
+
+    if (path === '/dashboard') {
+      tourSteps = tourPrimeiroOrcamento;
+      key = 'cpro_tour_orcamento_done';
+    } else if (path === '/clients') {
+      tourSteps = tourCadastrarCliente;
+      key = 'cpro_tour_cliente_done';
+    }
+
+    if (tourSteps) {
+      const tour = new TourEngine(tourSteps, { storageKey: key });
+      tour.forceStart();
+    }
+  };
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -56,7 +106,7 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
         <div className="ml-auto flex items-center gap-4">
           <button 
             onClick={() => navigate('/new')}
-            className="hidden sm:flex items-center gap-2 bg-amber text-black font-montserrat font-extrabold text-[11px] uppercase tracking-widest px-5 py-2.5 rounded-r-md transition-all hover:bg-amber-hover hover:-translate-y-0.5 shadow-amber-glow"
+            className="topbar-btn-novo hidden sm:flex items-center gap-2 bg-amber text-black font-montserrat font-extrabold text-[11px] uppercase tracking-widest px-5 py-2.5 rounded-r-md transition-all hover:bg-amber-hover hover:-translate-y-0.5 shadow-amber-glow"
           >
             <PlusCircle className="w-4 h-4" /> Novo Serviço
           </button>
@@ -69,6 +119,16 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
       <main className="flex-1">
         {children}
       </main>
+
+      {/* FAB Help */}
+      <button 
+        className="tour-fab" 
+        data-has-tour={hasTour}
+        onClick={handleHelpClick}
+        title="Ajuda / Tutorial"
+      >
+        <HelpCircle className="w-6 h-6" />
+      </button>
 
       {/* Mobile Bottom Nav */}
       <nav className="sm:hidden fixed bottom-0 left-0 w-full bg-ink-secondary border-t border-rim px-6 py-3 flex justify-between items-center z-[300]">

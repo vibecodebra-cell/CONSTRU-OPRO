@@ -105,6 +105,7 @@ const NewService = () => {
               <div>
                 <label className="block text-[11.5px] font-semibold tracking-wider uppercase text-t-2 mb-2">Cliente</label>
                 <select 
+                  name="cliente"
                   className="finput appearance-none bg-[url('data:image/svg+xml,%3Csvg_xmlns=%22http://www.w3.org/2000/svg%22_width=%2212%22_height=%228%22_viewBox=%220_0_12_8%22%3E%3Cpath_d=%22M1_1l5_5_5-5%22_stroke=%22%2394A3B8%22_stroke-width=%221.5%22_fill=%22none%22_stroke-linecap=%22round%22/%3E%3C/svg%3E')] bg-no-repeat bg-[right_16px_center]"
                   onChange={(e) => updateFormData({ clienteId: e.target.value })}
                   value={formData.clienteId || ''}
@@ -120,7 +121,7 @@ const NewService = () => {
                     <button 
                       key={p}
                       onClick={() => updateFormData({ profissao: p as Profession })}
-                      className={`flex-1 py-2 rounded-r-sm text-[11px] font-bold uppercase tracking-wider transition-all ${formData.profissao === p ? 'bg-amber text-black' : 'text-t-2 hover:text-t-1'}`}
+                      className={`profissao-toggle-${p} flex-1 py-2 rounded-r-sm text-[11px] font-bold uppercase tracking-wider transition-all ${formData.profissao === p ? 'bg-amber text-black' : 'text-t-2 hover:text-t-1'}`}
                     >
                       {p}
                     </button>
