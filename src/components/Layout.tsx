@@ -13,7 +13,7 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const navigate = useNavigate();
 
   const navItems = [
-    { path: '/', label: 'Dashboard', icon: LayoutDashboard },
+    { path: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
     { path: '/clients', label: 'Clientes', icon: Users },
     { path: '/proposals', label: 'Histórico', icon: History },
     { path: '/settings', label: 'Config', icon: Settings },
@@ -22,14 +22,14 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   return (
     <div className="min-h-screen flex flex-col">
       <header className="glass-topbar h-18 px-6 flex items-center gap-4">
-        <div className="flex items-center gap-3 mr-8">
+        <Link to="/" className="flex items-center gap-3 mr-8 hover:opacity-80 transition-opacity">
           <div className="bg-amber p-2 rounded-lg shadow-amber-glow">
             <Hammer className="w-5 h-5 text-black" strokeWidth={3} />
           </div>
           <span className="font-montserrat font-extrabold text-xl tracking-tighter hidden sm:inline">
             CONSTRUTOR <em className="text-amber not-italic">PRO</em>
           </span>
-        </div>
+        </Link>
 
         <nav className="flex gap-1" role="navigation">
           {navItems.map((item) => {
