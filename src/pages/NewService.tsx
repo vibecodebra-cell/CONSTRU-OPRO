@@ -355,7 +355,7 @@ const NewService = () => {
         {step < 5 ? (
           <button 
             onClick={nextStep}
-            className="btn-amber !w-auto px-10 h-14"
+            className="btn-amber btn-proximo-passo !w-auto px-10 h-14"
           >
             Próximo Passo <ArrowRight className="w-4 h-4" />
           </button>

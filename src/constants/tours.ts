@@ -32,7 +32,7 @@ export const tourPrimeiroOrcamento: TourStep[] = [
     action: (target) => target.focus(),
   },
   {
-    target: 'button:contains("Próximo Passo")',
+    target: '.btn-proximo-passo',
     title: 'Avance para os materiais',
     desc: 'Informações preenchidas. Agora vamos calcular o material.',
     cta: 'Toque em Próximo',
@@ -48,7 +48,7 @@ export const tourCadastrarCliente: TourStep[] = [
     cta: 'Toque em Clientes',
   },
   {
-    target: 'button:contains("Novo Cliente")',
+    target: '.btn-novo-cliente',
     title: 'Adicione um cliente',
     desc: 'Cadastre o nome e telefone para usar nos próximos orçamentos.',
     cta: 'Toque no botão laranja',
@@ -62,7 +62,7 @@ export const tourCadastrarCliente: TourStep[] = [
     action: (target) => target.focus(),
   },
   {
-    target: 'button:contains("Salvar Cliente")',
+    target: '.btn-salvar-cliente',
     title: 'Pronto! Salve o cliente',
     desc: 'O cliente vai aparecer na busca quando criar orçamentos.',
     cta: 'Toque para salvar',

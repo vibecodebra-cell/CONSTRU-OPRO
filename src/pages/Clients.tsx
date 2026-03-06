@@ -48,7 +48,7 @@ const Clients = () => {
         </h2>
         <button 
           onClick={() => setIsModalOpen(true)}
-          className="flex items-center gap-2 bg-amber text-black font-montserrat font-bold text-[13px] uppercase px-5 py-3 rounded-r-md transition-all hover:bg-amber-hover hover:-translate-y-0.5 shadow-amber-glow"
+          className="btn-novo-cliente flex items-center gap-2 bg-amber text-black font-montserrat font-bold text-[13px] uppercase px-5 py-3 rounded-r-md transition-all hover:bg-amber-hover hover:-translate-y-0.5 shadow-amber-glow"
         >
           <Plus className="w-3.5 h-3.5" /> Novo Cliente
         </button>
@@ -127,7 +127,7 @@ const Clients = () => {
                   <option value="industrial">Industrial</option>
                 </select>
               </div>
-              <button onClick={handleAddClient} className="btn-amber mt-4"><Save className="w-4 h-4" /> Salvar Cliente</button>
+              <button onClick={handleAddClient} className="btn-salvar-cliente btn-amber mt-4"><Save className="w-4 h-4" /> Salvar Cliente</button>
             </div>
           </div>
         </div>
