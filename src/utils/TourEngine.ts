@@ -80,6 +80,7 @@ export class TourEngine {
       );
 
       if (!isInside) {
+        // Se clicar no tooltip (botão pular), permite
         if (this.$tooltip?.contains(e.target as Node)) return;
 
         e.preventDefault();
@@ -95,18 +96,16 @@ export class TourEngine {
     const step = this.steps[index];
     let target: HTMLElement | null = null;
 
-    // Suporte a múltiplos seletores (tenta encontrar o primeiro visível)
     const selectors = Array.isArray(step.target) ? step.target : [step.target];
     for (const selector of selectors) {
       const el = document.querySelector(selector) as HTMLElement;
-      if (el && el.offsetParent !== null) { // Verifica se o elemento está visível
+      if (el && el.offsetParent !== null) {
         target = el;
         break;
       }
     }
 
     if (!target) {
-      console.warn(`[TourEngine] Target não encontrado ou invisível: ${step.target}`);
       if (index < this.steps.length - 1) {
         this.current++;
         this._applyStep(this.current);
@@ -261,19 +260,22 @@ export class TourEngine {
 
   private _calcTooltipPos(rect: DOMRect) {
     const TW = 280;
-    const TH = 160;
-    const GAP = 16;
+    const TH = 180;
+    const GAP = 20;
     const vw = window.innerWidth;
     const vh = window.innerHeight;
 
+    // Mobile: Se o elemento estiver na metade de baixo, mostra o card em cima.
+    if (vw < 640) {
+      const isBottomHalf = rect.top > vh / 2;
+      const top = isBottomHalf ? 40 : vh - TH - 40;
+      return { top, left: (vw - TW) / 2, dir: isBottomHalf ? 'bottom' : 'top' };
+    }
+
+    // Desktop: Lógica padrão de proximidade
     let dir = 'bottom';
     let top = rect.bottom + GAP;
     let left = rect.left + rect.width / 2 - TW / 2;
-
-    // Se for mobile, centraliza e fixa embaixo
-    if (vw < 640) {
-      return { top: vh - TH - 20, left: (vw - TW) / 2, dir: 'none' };
-    }
 
     if (top + TH > vh) {
       dir = 'top';
