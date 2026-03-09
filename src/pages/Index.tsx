@@ -42,12 +42,6 @@ const Index = () => {
               >
                 Começar Agora <ArrowRight className="w-5 h-5" />
               </button>
-              <button 
-                onClick={() => navigate('/login')}
-                className="btn-ghost !w-auto px-10 h-16 text-base"
-              >
-                Ver Planos e Preços
-              </button>
             </div>
             
             <div className="mt-8 flex items-center gap-3 text-t-3 text-sm font-medium">
