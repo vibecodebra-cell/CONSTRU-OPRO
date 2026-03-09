@@ -1,6 +1,6 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowRight, Zap, Droplets, Hammer, BarChart3, DollarSign, TrendingUp, ShieldCheck } from 'lucide-react';
+import { ArrowRight, Zap, Droplets, Hammer, BarChart3, DollarSign, TrendingUp, ShieldCheck, Check } from 'lucide-react';
 import ProblemSection from '../components/landing/ProblemSection';
 import Testimonials from '../components/landing/Testimonials';
 import FAQ from '../components/landing/FAQ';
@@ -133,25 +133,64 @@ const Index = () => {
 
       {/* PRICING CTA */}
       <section className="py-24 bg-amber">
-        <div className="max-w-[900px] mx-auto px-6 text-center">
-          <h2 className="font-montserrat font-extrabold text-4xl md:text-5xl text-black tracking-tighter mb-6">
-            Sua obra merece um <em className="italic">lucro de verdade.</em>
-          </h2>
-          <p className="text-black/80 text-xl font-medium mb-12">
-            Custa menos que um café por dia para parar de perder dinheiro em orçamento errado.
-          </p>
-          <div className="bg-black/5 border border-black/10 rounded-r-xl p-10 mb-12">
-            <div className="text-black font-montserrat font-extrabold text-6xl mb-2">R$ 29<span className="text-2xl">,90/mês</span></div>
-            <p className="text-black/60 font-bold uppercase tracking-widest text-sm">Plano Profissional Completo</p>
+        <div className="max-w-[1180px] mx-auto px-6">
+          <div className="text-center mb-16">
+            <h2 className="font-montserrat font-extrabold text-4xl md:text-5xl text-black tracking-tighter mb-6">
+              Sua obra merece um <em className="italic">lucro de verdade.</em>
+            </h2>
+            <p className="text-black/80 text-xl font-medium">
+              Escolha o plano que melhor se adapta ao seu momento.
+            </p>
           </div>
-          <button 
-            onClick={() => navigate('/login')}
-            className="w-full md:w-auto px-16 h-20 bg-black text-amber font-montserrat font-extrabold text-xl uppercase tracking-wider rounded-r-md shadow-2xl hover:-translate-y-1 transition-all"
-          >
-            Quero Lucrar Mais Agora
-          </button>
-          <p className="mt-6 text-black/60 text-sm font-bold uppercase tracking-widest">
-            Oferta por tempo limitado • Cancele quando quiser
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-[900px] mx-auto">
+            {/* Plano Mensal */}
+            <div className="bg-black/5 border border-black/10 rounded-r-xl p-8 flex flex-col">
+              <div className="mb-6">
+                <h3 className="text-black font-montserrat font-extrabold text-xl uppercase tracking-wider mb-2">Plano Mensal</h3>
+                <div className="text-black font-montserrat font-extrabold text-5xl">R$ 29<span className="text-xl">,90</span></div>
+                <p className="text-black/60 text-sm font-bold">cobrado mensalmente</p>
+              </div>
+              <ul className="space-y-3 mb-8 flex-1">
+                <li className="flex items-center gap-2 text-black/80 font-medium text-sm"><Check className="w-4 h-4" /> Orçamentos ilimitados</li>
+                <li className="flex items-center gap-2 text-black/80 font-medium text-sm"><Check className="w-4 h-4" /> Gestão de clientes</li>
+                <li className="flex items-center gap-2 text-black/80 font-medium text-sm"><Check className="w-4 h-4" /> Propostas em PDF</li>
+              </ul>
+              <button 
+                onClick={() => navigate('/login')}
+                className="w-full py-4 bg-black/10 border border-black/20 text-black font-montserrat font-extrabold text-sm uppercase tracking-widest rounded-r-md hover:bg-black/20 transition-all"
+              >
+                Assinar Mensal
+              </button>
+            </div>
+
+            {/* Plano Anual */}
+            <div className="bg-black border border-black rounded-r-xl p-8 flex flex-col relative shadow-2xl transform md:scale-105">
+              <div className="absolute -top-4 left-1/2 -translate-x-1/2 bg-white text-black text-[10px] font-extrabold uppercase tracking-[2px] px-4 py-1.5 rounded-full shadow-lg">
+                Melhor Valor
+              </div>
+              <div className="mb-6">
+                <h3 className="text-amber font-montserrat font-extrabold text-xl uppercase tracking-wider mb-2">Plano Anual</h3>
+                <div className="text-white font-montserrat font-extrabold text-5xl">R$ 250<span className="text-xl">,00</span></div>
+                <p className="text-amber font-bold text-sm uppercase tracking-wider mt-1">Economize R$ 108,80</p>
+                <p className="text-t-2 text-xs font-medium">equivalente a R$ 20,83/mês</p>
+              </div>
+              <ul className="space-y-3 mb-8 flex-1">
+                <li className="flex items-center gap-2 text-t-1 font-medium text-sm"><Check className="w-4 h-4 text-amber" /> Tudo do plano mensal</li>
+                <li className="flex items-center gap-2 text-t-1 font-medium text-sm"><Check className="w-4 h-4 text-amber" /> Suporte prioritário</li>
+                <li className="flex items-center gap-2 text-t-1 font-medium text-sm"><Check className="w-4 h-4 text-amber" /> Acesso antecipado a funções</li>
+              </ul>
+              <button 
+                onClick={() => navigate('/login')}
+                className="w-full py-5 bg-amber text-black font-montserrat font-extrabold text-sm uppercase tracking-widest rounded-r-md shadow-amber-glow hover:bg-amber-hover transition-all"
+              >
+                Assinar Anual Agora
+              </button>
+            </div>
+          </div>
+
+          <p className="mt-12 text-center text-black/60 text-sm font-bold uppercase tracking-widest">
+            Pagamento 100% seguro • Cancele quando quiser
           </p>
         </div>
       </section>
