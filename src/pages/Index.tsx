@@ -11,36 +11,52 @@ const Index = () => {
   return (
     <div className="animate-fade-up">
       {/* HERO SECTION */}
-      <section className="max-w-[1180px] mx-auto px-6 py-16 md:py-28">
-        <div className="max-w-[800px]">
-          <p className="text-amber text-[11px] font-semibold tracking-[2px] uppercase mb-4">
-            Plataforma Profissional para Autônomos
-          </p>
-          <h1 className="font-montserrat font-extrabold text-[clamp(36px,6vw,72px)] leading-[0.95] tracking-tighter mb-8">
-            Pare de perder dinheiro com <em className="text-amber not-italic">orçamento no papel.</em>
-          </h1>
-          <p className="text-t-2 text-lg md:text-xl font-light leading-relaxed max-w-[580px] mb-12">
-            Calcule materiais, gere propostas profissionais em PDF e aumente sua margem de lucro em segundos. Sem precisar de contador ou engenheiro.
-          </p>
-
-          <div className="flex flex-col sm:flex-row gap-4">
-            <button 
-              onClick={() => navigate('/login')}
-              className="btn-amber !w-auto px-10 h-16 text-base"
-            >
-              Começar Agora Grátis <ArrowRight className="w-5 h-5" />
-            </button>
-            <button 
-              onClick={() => navigate('/login')}
-              className="btn-ghost !w-auto px-10 h-16 text-base"
-            >
-              Ver Planos e Preços
-            </button>
-          </div>
+      <section className="max-w-[1180px] mx-auto px-6 py-12 md:py-28">
+        <div className="grid grid-cols-1 lg:grid-cols-2 items-center gap-12">
           
-          <div className="mt-8 flex items-center gap-3 text-t-3 text-sm font-medium">
-            <ShieldCheck className="w-5 h-5 text-success" />
-            Teste grátis por 7 dias • Sem cartão de crédito • Cancele quando quiser
+          {/* Imagem - Aparece primeiro no mobile (acima do texto) e à direita no desktop */}
+          <div className="order-1 lg:order-2 flex justify-center lg:justify-end">
+            <div className="relative group">
+              <div className="absolute -inset-1 bg-gradient-to-r from-amber to-amber-hover rounded-r-xl blur opacity-25 group-hover:opacity-50 transition duration-1000 group-hover:duration-200"></div>
+              <img 
+                src="/Image_fx-(13).png" 
+                alt="Construtor Pro App" 
+                className="relative w-full max-w-[540px] rounded-r-xl shadow-pop animate-in fade-in slide-in-from-right-10 duration-700"
+              />
+            </div>
+          </div>
+
+          {/* Conteúdo de Texto */}
+          <div className="order-2 lg:order-1">
+            <p className="text-amber text-[11px] font-semibold tracking-[2px] uppercase mb-4">
+              Plataforma Profissional para Autônomos
+            </p>
+            <h1 className="font-montserrat font-extrabold text-[clamp(36px,6vw,72px)] leading-[0.95] tracking-tighter mb-8">
+              Pare de perder dinheiro com <em className="text-amber not-italic">orçamento no papel.</em>
+            </h1>
+            <p className="text-t-2 text-lg md:text-xl font-light leading-relaxed max-w-[580px] mb-12">
+              Calcule materiais, gere propostas profissionais em PDF e aumente sua margem de lucro em segundos. Sem precisar de contador ou engenheiro.
+            </p>
+
+            <div className="flex flex-col sm:flex-row gap-4">
+              <button 
+                onClick={() => navigate('/login')}
+                className="btn-amber !w-auto px-10 h-16 text-base"
+              >
+                Começar Agora Grátis <ArrowRight className="w-5 h-5" />
+              </button>
+              <button 
+                onClick={() => navigate('/login')}
+                className="btn-ghost !w-auto px-10 h-16 text-base"
+              >
+                Ver Planos e Preços
+              </button>
+            </div>
+            
+            <div className="mt-8 flex items-center gap-3 text-t-3 text-sm font-medium">
+              <ShieldCheck className="w-5 h-5 text-success" />
+              Teste grátis por 7 dias • Sem cartão de crédito • Cancele quando quiser
+            </div>
           </div>
         </div>
       </section>
