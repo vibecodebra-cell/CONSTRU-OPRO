@@ -40,7 +40,7 @@ const Index = () => {
                 onClick={() => navigate('/login')}
                 className="btn-amber !w-auto px-10 h-16 text-base"
               >
-                Começar Agora Grátis <ArrowRight className="w-5 h-5" />
+                Começar Agora <ArrowRight className="w-5 h-5" />
               </button>
               <button 
                 onClick={() => navigate('/login')}
@@ -52,7 +52,7 @@ const Index = () => {
             
             <div className="mt-8 flex items-center gap-3 text-t-3 text-sm font-medium">
               <ShieldCheck className="w-5 h-5 text-success" />
-              Teste grátis por 7 dias • Sem cartão de crédito • Cancele quando quiser
+              Acesso imediato • Pagamento seguro • Cancele quando quiser
             </div>
           </div>
         </div>
@@ -172,7 +172,7 @@ const Index = () => {
             onClick={() => navigate('/login')}
             className="btn-amber !w-auto px-12 h-16 text-lg"
           >
-            Criar Minha Conta Grátis
+            Criar Minha Conta
           </button>
         </div>
       </section>
