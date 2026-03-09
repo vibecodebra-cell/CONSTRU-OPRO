@@ -131,6 +131,15 @@ const Index = () => {
       {/* TESTIMONIALS */}
       <Testimonials />
 
+      {/* IMAGE SECTION */}
+      <section className="w-full">
+        <img 
+          src="https://i.imgur.com/Bu6F5yD.png" 
+          alt="Banner Construtor Pro" 
+          className="w-full h-auto block"
+        />
+      </section>
+
       {/* PRICING CTA */}
       <section className="py-24 bg-amber">
         <div className="max-w-[1180px] mx-auto px-6">
