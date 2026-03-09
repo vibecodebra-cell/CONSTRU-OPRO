@@ -16,14 +16,11 @@ const Index = () => {
           
           {/* Imagem - Aparece primeiro no mobile (acima do texto) e à direita no desktop */}
           <div className="order-1 lg:order-2 flex justify-center lg:justify-end">
-            <div className="relative group">
-              <div className="absolute -inset-1 bg-gradient-to-r from-amber to-amber-hover rounded-r-xl blur opacity-25 group-hover:opacity-50 transition duration-1000 group-hover:duration-200"></div>
-              <img 
-                src="https://i.imgur.com/O7bwKFE.png" 
-                alt="Construtor Pro App" 
-                className="relative w-full max-w-[540px] rounded-r-xl shadow-pop animate-in fade-in slide-in-from-right-10 duration-700"
-              />
-            </div>
+            <img 
+              src="https://i.imgur.com/O7bwKFE.png" 
+              alt="Construtor Pro App" 
+              className="w-full max-w-[540px] rounded-r-xl shadow-pop animate-in fade-in slide-in-from-right-10 duration-700"
+            />
           </div>
 
           {/* Conteúdo de Texto */}
