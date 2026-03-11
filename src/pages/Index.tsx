@@ -2,6 +2,7 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ArrowRight, Zap, Droplets, Hammer, BarChart3, DollarSign, TrendingUp, ShieldCheck, Check } from 'lucide-react';
 import ProblemSection from '../components/landing/ProblemSection';
+import HowItWorks from '../components/landing/HowItWorks';
 import Testimonials from '../components/landing/Testimonials';
 import FAQ from '../components/landing/FAQ';
 
@@ -14,7 +15,6 @@ const Index = () => {
       <section className="max-w-[1180px] mx-auto px-6 py-12 md:py-28">
         <div className="grid grid-cols-1 lg:grid-cols-2 items-center gap-12">
           
-          {/* Imagem - Aparece primeiro no mobile (acima do texto) e à direita no desktop */}
           <div className="order-1 lg:order-2 flex justify-center lg:justify-end">
             <img 
               src="https://i.imgur.com/O7bwKFE.png" 
@@ -23,7 +23,6 @@ const Index = () => {
             />
           </div>
 
-          {/* Conteúdo de Texto */}
           <div className="order-2 lg:order-1">
             <p className="text-amber text-[11px] font-semibold tracking-[2px] uppercase mb-4">
               Plataforma Profissional para Autônomos
@@ -121,6 +120,9 @@ const Index = () => {
           </div>
         </div>
       </section>
+
+      {/* HOW IT WORKS */}
+      <HowItWorks />
 
       {/* TESTIMONIALS */}
       <Testimonials />
