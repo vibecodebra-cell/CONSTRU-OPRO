@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, ArrowRight, Check, Plus, FileDown, Share2, Save, Clock, TrendingUp } from 'lucide-react';
 import { useApp } from '../context/AppContext';
@@ -8,9 +8,11 @@ import MaterialsStep from '../components/newservice/MaterialsStep';
 
 const NewService = () => {
   const navigate = useNavigate();
-  const { clients, addService } = useApp();
+  const { clients, addService, profile } = useApp();
   const [step, setStep] = useState(1);
   const [toast, setToast] = useState({ show: false, message: '' });
+  const [generatingPdf, setGeneratingPdf] = useState(false);
+  const proposalRef = useRef<HTMLDivElement>(null);
 
   const [formData, setFormData] = useState<Partial<Service>>({
     numero: Math.floor(Math.random() * 9000) + 1000,
@@ -34,24 +36,105 @@ const NewService = () => {
   const updateFormData = (updates: Partial<Service>) => {
     setFormData(prev => {
       const newData = { ...prev, ...updates };
-      if ('maoDeObra' in updates || 'custosExtras' in updates || 'margem' in updates || 'totalMaterial' in updates) {
-        const subtotal = (newData.totalMaterial || 0) + (newData.maoDeObra || 0) + (newData.custosExtras || 0);
-        const lucroCalculado = subtotal * ((newData.margem || 0) / 100);
-        newData.lucro = Math.round(lucroCalculado);
-        newData.totalFinal = Math.round(subtotal + lucroCalculado);
-      }
+      // Recalcula lucro e total sem alterar mão de obra
+      const subtotal = (newData.totalMaterial || 0) + (newData.maoDeObra || 0) + (newData.custosExtras || 0);
+      const lucroCalculado = subtotal * ((newData.margem || 0) / 100);
+      newData.lucro = Math.round(lucroCalculado);
+      newData.totalFinal = Math.round(subtotal + lucroCalculado);
       return newData;
     });
   };
 
   const handleMaterialTotalChange = (total: number) => {
-    updateFormData({ totalMaterial: total });
+    setFormData(prev => {
+      const newData = { ...prev, totalMaterial: total };
+      const subtotal = (newData.totalMaterial || 0) + (newData.maoDeObra || 0) + (newData.custosExtras || 0);
+      const lucroCalculado = subtotal * ((newData.margem || 0) / 100);
+      newData.lucro = Math.round(lucroCalculado);
+      newData.totalFinal = Math.round(subtotal + lucroCalculado);
+      return newData;
+    });
   };
 
   const handleSave = async () => {
     await addService(formData);
     setToast({ show: true, message: 'Serviço salvo com sucesso!' });
     setTimeout(() => navigate('/dashboard'), 1500);
+  };
+
+  const handleGeneratePdf = async () => {
+    if (!proposalRef.current) return;
+    setGeneratingPdf(true);
+    try {
+      const { default: jsPDF } = await import('jspdf');
+      const { default: html2canvas } = await import('html2canvas');
+
+      const canvas = await html2canvas(proposalRef.current, {
+        scale: 2,
+        useCORS: true,
+        backgroundColor: '#ffffff',
+        logging: false,
+      });
+
+      const imgData = canvas.toDataURL('image/png');
+      const pdf = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
+
+      const pageWidth = 210;
+      const pageHeight = 297;
+      const imgWidth = pageWidth;
+      const imgHeight = (canvas.height * pageWidth) / canvas.width;
+
+      let heightLeft = imgHeight;
+      let position = 0;
+
+      pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+      heightLeft -= pageHeight;
+
+      while (heightLeft > 0) {
+        position = heightLeft - imgHeight;
+        pdf.addPage();
+        pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+        heightLeft -= pageHeight;
+      }
+
+      pdf.save(`proposta-${formData.numero}-${selectedClient?.nome || 'cliente'}.pdf`);
+      setToast({ show: true, message: 'PDF gerado com sucesso!' });
+    } catch (err) {
+      console.error(err);
+      setToast({ show: true, message: 'Erro ao gerar PDF.' });
+    } finally {
+      setGeneratingPdf(false);
+    }
+  };
+
+  const handleShare = () => {
+    const client = selectedClient;
+    const msg = [
+      `*PROPOSTA DE SERVIÇO #${formData.numero}*`,
+      ``,
+      `👷 *Profissional:* ${profile.nome}`,
+      `📋 *Serviço:* ${formData.tipoServico}`,
+      `📍 *Endereço:* ${formData.endereco || 'A definir'}`,
+      ``,
+      `💰 *Composição de Valores:*`,
+      `• Materiais: R$ ${(formData.totalMaterial || 0).toLocaleString('pt-BR')}`,
+      `• Mão de obra: R$ ${(formData.maoDeObra || 0).toLocaleString('pt-BR')}`,
+      `• Custos extras: R$ ${(formData.custosExtras || 0).toLocaleString('pt-BR')}`,
+      ``,
+      `✅ *TOTAL: R$ ${(formData.totalFinal || 0).toLocaleString('pt-BR')}*`,
+      ``,
+      `📅 *Prazo de entrega:* ${formData.prazoCliente} dias úteis`,
+      `🛡️ *Garantia:* ${formData.garantia}`,
+      ``,
+      `_Proposta gerada pelo Construtor Pro_`,
+    ].join('\n');
+
+    const phone = client?.telefone?.replace(/\D/g, '') || '';
+    const url = phone
+      ? `https://wa.me/55${phone}?text=${encodeURIComponent(msg)}`
+      : `https://wa.me/?text=${encodeURIComponent(msg)}`;
+
+    window.open(url, '_blank');
   };
 
   const nextStep = () => setStep(s => Math.min(s + 1, 5));
@@ -66,6 +149,7 @@ const NewService = () => {
   ];
 
   const selectedClient = clients.find(c => c.id === formData.clienteId);
+  const fmt = (v: number) => v.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 
   return (
     <div className="max-w-[1024px] mx-auto px-6 py-10 animate-fade-up">
@@ -192,9 +276,12 @@ const NewService = () => {
         {step === 4 && (
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
             <div className="space-y-6">
-              <h3 className="font-montserrat font-bold text-xl mb-8 flex items-center gap-3">
+              <h3 className="font-montserrat font-bold text-xl mb-4 flex items-center gap-3">
                 <TrendingUp className="text-amber" /> Precificação e Lucro
               </h3>
+              <p className="text-t-3 text-xs leading-relaxed -mt-2">
+                A margem de lucro é aplicada sobre o subtotal (material + mão de obra + extras).
+              </p>
               <div className="space-y-4">
                 <div>
                   <label className="block text-[11.5px] font-semibold tracking-wider uppercase text-t-2 mb-2">Mão de Obra (R$)</label>
@@ -215,39 +302,57 @@ const NewService = () => {
                   />
                 </div>
                 <div>
-                  <label className="block text-[11.5px] font-semibold tracking-wider uppercase text-t-2 mb-2">Margem Desejada (%)</label>
+                  <label className="block text-[11.5px] font-semibold tracking-wider uppercase text-t-2 mb-2">
+                    Margem Desejada (%) — Lucro sobre o subtotal
+                  </label>
                   <input
                     type="number"
                     value={formData.margem}
                     onChange={(e) => updateFormData({ margem: +e.target.value })}
                     className="finput"
                   />
+                  {/* Slider visual */}
+                  <input
+                    type="range"
+                    min={0}
+                    max={100}
+                    value={formData.margem}
+                    onChange={(e) => updateFormData({ margem: +e.target.value })}
+                    className="w-full mt-3 accent-amber"
+                  />
+                  <div className="flex justify-between text-[10px] text-t-3 font-bold mt-1">
+                    <span>0%</span><span>25%</span><span>50%</span><span>75%</span><span>100%</span>
+                  </div>
                 </div>
               </div>
             </div>
             <div className="bg-ink-tertiary border border-rim rounded-r-xl p-8 flex flex-col justify-center">
-              <div className="space-y-4 mb-8">
-                <div className="flex justify-between items-center text-t-2">
+              <div className="space-y-3 mb-8">
+                <div className="flex justify-between items-center text-t-2 py-2 border-b border-rim">
                   <span className="text-sm">Material</span>
-                  <span className="font-semibold">R$ {(formData.totalMaterial || 0).toLocaleString('pt-BR')}</span>
+                  <span className="font-semibold">R$ {fmt(formData.totalMaterial || 0)}</span>
                 </div>
-                <div className="flex justify-between items-center text-t-2">
+                <div className="flex justify-between items-center text-t-2 py-2 border-b border-rim">
                   <span className="text-sm">Mão de Obra</span>
-                  <span className="font-semibold">R$ {(formData.maoDeObra || 0).toLocaleString('pt-BR')}</span>
+                  <span className="font-semibold">R$ {fmt(formData.maoDeObra || 0)}</span>
                 </div>
-                <div className="flex justify-between items-center text-t-2">
+                <div className="flex justify-between items-center text-t-2 py-2 border-b border-rim">
                   <span className="text-sm">Custos Extras</span>
-                  <span className="font-semibold">R$ {(formData.custosExtras || 0).toLocaleString('pt-BR')}</span>
+                  <span className="font-semibold">R$ {fmt(formData.custosExtras || 0)}</span>
                 </div>
-                <div className="flex justify-between items-center text-success border-t border-rim pt-4">
-                  <span className="text-sm font-bold uppercase tracking-wider">Lucro Estimado ({formData.margem}%)</span>
-                  <span className="font-bold">R$ {(formData.lucro || 0).toLocaleString('pt-BR')}</span>
+                <div className="flex justify-between items-center text-t-2 py-2 border-b border-rim">
+                  <span className="text-sm font-bold">Subtotal</span>
+                  <span className="font-bold">R$ {fmt((formData.totalMaterial || 0) + (formData.maoDeObra || 0) + (formData.custosExtras || 0))}</span>
+                </div>
+                <div className="flex justify-between items-center text-success py-2">
+                  <span className="text-sm font-bold uppercase tracking-wider">Lucro ({formData.margem}%)</span>
+                  <span className="font-bold text-success">+ R$ {fmt(formData.lucro || 0)}</span>
                 </div>
               </div>
               <div className="p-6 bg-surface border border-amber/30 rounded-r-lg shadow-amber-glow">
                 <div className="text-[11px] font-bold uppercase tracking-widest text-t-2 mb-1">Preço Final da Proposta</div>
                 <div className="font-montserrat font-extrabold text-4xl text-amber tracking-tighter">
-                  R$ {(formData.totalFinal || 0).toLocaleString('pt-BR')}
+                  R$ {fmt(formData.totalFinal || 0)}
                 </div>
               </div>
             </div>
@@ -257,63 +362,116 @@ const NewService = () => {
         {/* STEP 5 — Proposta */}
         {step === 5 && (
           <div className="max-w-[640px] mx-auto">
-            <div className="bg-white text-black p-10 rounded-r-sm shadow-pop mb-8 font-dmsans">
-              <div className="flex justify-between items-start mb-10">
+            {/* Proposta A4 */}
+            <div
+              ref={proposalRef}
+              style={{ fontFamily: 'Arial, sans-serif', backgroundColor: '#ffffff', color: '#111', width: '794px', minHeight: '1123px', padding: '60px 56px', boxSizing: 'border-box' }}
+            >
+              {/* Cabeçalho */}
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '40px', borderBottom: '3px solid #F59E0B', paddingBottom: '24px' }}>
                 <div>
-                  <div className="font-montserrat font-extrabold text-xl tracking-tight text-amber">CONSTRUTOR PRO</div>
-                  <div className="text-[11px] font-bold uppercase tracking-widest text-gray-400">Proposta de Serviço #{formData.numero}</div>
+                  <div style={{ fontWeight: 900, fontSize: '22px', letterSpacing: '-0.5px', color: '#F59E0B' }}>CONSTRUTOR PRO</div>
+                  <div style={{ fontSize: '11px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '2px', color: '#888', marginTop: '4px' }}>Proposta de Serviço</div>
+                  <div style={{ fontSize: '13px', fontWeight: 600, color: '#333', marginTop: '8px' }}>{profile.nome}</div>
+                  {profile.telefone && <div style={{ fontSize: '12px', color: '#666', marginTop: '2px' }}>📞 {profile.telefone}</div>}
+                  {profile.cidade && <div style={{ fontSize: '12px', color: '#666', marginTop: '2px' }}>📍 {profile.cidade}{profile.estado ? `, ${profile.estado}` : ''}</div>}
                 </div>
-                <div className="text-right text-[11px] font-bold uppercase tracking-widest text-gray-400">Data: {new Date().toLocaleDateString('pt-BR')}</div>
-              </div>
-              <div className="grid grid-cols-2 gap-8 mb-10">
-                <div>
-                  <div className="text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-1">Cliente</div>
-                  <div className="font-bold">{selectedClient?.nome || 'Não selecionado'}</div>
-                  <div className="text-[12px] text-gray-500">{selectedClient?.telefone || ''}</div>
-                </div>
-                <div>
-                  <div className="text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-1">Serviço</div>
-                  <div className="font-bold">{formData.tipoServico}</div>
-                  <div className="text-[12px] text-gray-500">{formData.endereco || 'Endereço não informado'}</div>
-                </div>
-              </div>
-              <div className="space-y-3 mb-10 border-y border-gray-100 py-6">
-                <div className="flex justify-between">
-                  <span className="text-gray-500">Materiais</span>
-                  <span className="font-semibold">R$ {(formData.totalMaterial || 0).toLocaleString('pt-BR')}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-gray-500">Mão de Obra e Execução</span>
-                  <span className="font-semibold">R$ {(formData.maoDeObra || 0).toLocaleString('pt-BR')}</span>
-                </div>
-                {(formData.custosExtras || 0) > 0 && (
-                  <div className="flex justify-between">
-                    <span className="text-gray-500">Custos Adicionais</span>
-                    <span className="font-semibold">R$ {(formData.custosExtras || 0).toLocaleString('pt-BR')}</span>
+                <div style={{ textAlign: 'right' }}>
+                  <div style={{ fontSize: '28px', fontWeight: 900, color: '#111' }}>#{formData.numero}</div>
+                  <div style={{ fontSize: '11px', color: '#888', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '1px', marginTop: '4px' }}>
+                    {new Date().toLocaleDateString('pt-BR', { day: '2-digit', month: 'long', year: 'numeric' })}
                   </div>
-                )}
-                <div className="flex justify-between pt-4 border-t border-gray-100">
-                  <span className="font-montserrat font-bold uppercase tracking-wider text-sm">Valor Total da Obra</span>
-                  <span className="font-montserrat font-extrabold text-3xl text-amber">R$ {(formData.totalFinal || 0).toLocaleString('pt-BR')}</span>
+                  <div style={{ marginTop: '10px', display: 'inline-block', background: '#FEF3C7', color: '#92400E', fontSize: '10px', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '1.5px', padding: '4px 10px', borderRadius: '99px' }}>
+                    Válida por {formData.validade} dias
+                  </div>
                 </div>
               </div>
-              <div className="grid grid-cols-2 gap-8 text-[12px]">
-                <div>
-                  <div className="text-gray-400 font-bold uppercase tracking-widest mb-1">Prazo de Entrega</div>
-                  <div className="font-bold">{formData.prazoCliente} dias úteis</div>
+
+              {/* Cliente e Serviço */}
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '32px', marginBottom: '36px' }}>
+                <div style={{ background: '#F9FAFB', borderRadius: '10px', padding: '20px' }}>
+                  <div style={{ fontSize: '10px', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '2px', color: '#9CA3AF', marginBottom: '10px' }}>Cliente</div>
+                  <div style={{ fontWeight: 700, fontSize: '16px', color: '#111' }}>{selectedClient?.nome || 'Não informado'}</div>
+                  {selectedClient?.telefone && <div style={{ fontSize: '13px', color: '#555', marginTop: '4px' }}>📞 {selectedClient.telefone}</div>}
+                  {selectedClient?.email && <div style={{ fontSize: '13px', color: '#555', marginTop: '2px' }}>✉️ {selectedClient.email}</div>}
+                  {selectedClient?.cidade && <div style={{ fontSize: '13px', color: '#555', marginTop: '2px' }}>📍 {selectedClient.cidade}</div>}
                 </div>
-                <div>
-                  <div className="text-gray-400 font-bold uppercase tracking-widest mb-1">Garantia</div>
-                  <div className="font-bold">{formData.garantia}</div>
+                <div style={{ background: '#F9FAFB', borderRadius: '10px', padding: '20px' }}>
+                  <div style={{ fontSize: '10px', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '2px', color: '#9CA3AF', marginBottom: '10px' }}>Serviço</div>
+                  <div style={{ fontWeight: 700, fontSize: '16px', color: '#111' }}>{formData.tipoServico}</div>
+                  <div style={{ fontSize: '13px', color: '#555', marginTop: '4px', textTransform: 'capitalize' }}>👷 {formData.profissao}</div>
+                  {formData.endereco && <div style={{ fontSize: '13px', color: '#555', marginTop: '4px' }}>📍 {formData.endereco}</div>}
+                  {formData.dataInicio && <div style={{ fontSize: '13px', color: '#555', marginTop: '4px' }}>📅 Início: {new Date(formData.dataInicio + 'T00:00:00').toLocaleDateString('pt-BR')}</div>}
+                </div>
+              </div>
+
+              {/* Composição de Valores */}
+              <div style={{ marginBottom: '32px' }}>
+                <div style={{ fontSize: '11px', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '2px', color: '#9CA3AF', marginBottom: '14px' }}>Composição de Valores</div>
+                <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                  <tbody>
+                    {[
+                      ['Materiais', formData.totalMaterial || 0],
+                      ['Mão de Obra e Execução', formData.maoDeObra || 0],
+                      ...(formData.custosExtras ? [['Custos Adicionais', formData.custosExtras]] : []),
+                    ].map(([label, value], i) => (
+                      <tr key={i} style={{ borderBottom: '1px solid #E5E7EB' }}>
+                        <td style={{ padding: '12px 0', fontSize: '14px', color: '#374151' }}>{label as string}</td>
+                        <td style={{ padding: '12px 0', fontSize: '14px', fontWeight: 600, textAlign: 'right', color: '#111' }}>
+                          R$ {(value as number).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                        </td>
+                      </tr>
+                    ))}
+                    <tr>
+                      <td style={{ padding: '18px 0 8px', fontSize: '16px', fontWeight: 900, color: '#111' }}>VALOR TOTAL DA OBRA</td>
+                      <td style={{ padding: '18px 0 8px', fontSize: '28px', fontWeight: 900, textAlign: 'right', color: '#F59E0B' }}>
+                        R$ {(formData.totalFinal || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+
+              {/* Condições */}
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '16px', marginBottom: '36px' }}>
+                {[
+                  ['⏱️ Prazo de Entrega', `${formData.prazoCliente} dias úteis`],
+                  ['🛡️ Garantia', formData.garantia || '—'],
+                  ['💳 Pagamento', formData.formaPagamento || '—'],
+                ].map(([label, value], i) => (
+                  <div key={i} style={{ background: '#F9FAFB', borderRadius: '10px', padding: '16px' }}>
+                    <div style={{ fontSize: '11px', fontWeight: 700, color: '#9CA3AF', marginBottom: '6px' }}>{label}</div>
+                    <div style={{ fontSize: '14px', fontWeight: 700, color: '#111' }}>{value}</div>
+                  </div>
+                ))}
+              </div>
+
+              {/* Rodapé */}
+              <div style={{ borderTop: '2px solid #F3F4F6', paddingTop: '24px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <div style={{ fontSize: '11px', color: '#9CA3AF', fontWeight: 600 }}>
+                  Proposta gerada pelo <strong style={{ color: '#F59E0B' }}>Construtor Pro</strong>
+                </div>
+                <div style={{ fontSize: '11px', color: '#9CA3AF' }}>
+                  Esta proposta é válida por {formData.validade} dias a partir da data de emissão.
                 </div>
               </div>
             </div>
-            <div className="grid grid-cols-2 gap-4">
-              <button className="btn-blue h-14">
-                <FileDown className="w-4 h-4" /> Gerar PDF
+
+            {/* Botões */}
+            <div className="grid grid-cols-2 gap-4 mt-6">
+              <button
+                onClick={handleGeneratePdf}
+                disabled={generatingPdf}
+                className="btn-blue h-14 disabled:opacity-60"
+              >
+                {generatingPdf ? (
+                  <span className="flex items-center gap-2"><span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" /> Gerando...</span>
+                ) : (
+                  <><FileDown className="w-4 h-4" /> Gerar PDF</>
+                )}
               </button>
-              <button className="btn-ghost h-14">
-                <Share2 className="w-4 h-4" /> Compartilhar
+              <button onClick={handleShare} className="btn-ghost h-14">
+                <Share2 className="w-4 h-4" /> WhatsApp
               </button>
             </div>
           </div>
