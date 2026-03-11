@@ -9,6 +9,7 @@ import {
 } from 'lucide-react';
 import ProblemSection from '../components/landing/ProblemSection';
 import HowItWorks from '../components/landing/HowItWorks';
+import UrgencyTimer from '../components/landing/UrgencyTimer';
 
 const Index = () => {
   const navigate = useNavigate();
@@ -195,10 +196,7 @@ const Index = () => {
 
       {/* ── TOPBAR PROMOCIONAL ── */}
       <div className="bg-amber text-black py-2.5 px-4 flex items-center justify-center gap-3 text-center">
-        <Flame className="w-4 h-4 shrink-0" />
-        <p className="text-[13px] font-bold">
-          Promoção limitada — Plano Anual por <strong>R$250</strong> · Economize R$108 hoje
-        </p>
+        <UrgencyTimer />
         <button
           onClick={scrollToPrecos}
           className="shrink-0 bg-black text-amber text-[11px] font-extrabold uppercase tracking-widest px-4 py-1.5 rounded-full hover:bg-black/80 transition-all"
@@ -476,12 +474,12 @@ const Index = () => {
                   </li>
                 ))}
               </ul>
-              <button
-                onClick={() => navigate('/login')}
-                className="w-full py-4 bg-black/10 border border-black/20 text-black font-montserrat font-extrabold text-sm uppercase tracking-widest rounded-r-md hover:bg-black/20 transition-all"
+              <a
+                href="https://ggcheckout.com.br/checkout/v5/TMYX2GFnsMgjnH8xxDwe"
+                className="w-full py-4 bg-black/10 border border-black/20 text-black font-montserrat font-extrabold text-sm uppercase tracking-widest rounded-r-md hover:bg-black/20 transition-all text-center block"
               >
                 Assinar Mensal
-              </button>
+              </a>
             </div>
 
             {/* Anual */}
