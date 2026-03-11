@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   ArrowRight, ShieldCheck, Check, Star, ChevronDown, ChevronUp,
@@ -13,6 +13,11 @@ import HowItWorks from '../components/landing/HowItWorks';
 const Index = () => {
   const navigate = useNavigate();
   const [openFaq, setOpenFaq] = useState<number | null>(null);
+  const precosRef = useRef<HTMLElement>(null);
+
+  const scrollToPrecos = () => {
+    precosRef.current?.scrollIntoView({ behavior: 'smooth' });
+  };
 
   const pains = [
     {
@@ -195,7 +200,7 @@ const Index = () => {
           Promoção limitada — Plano Anual por <strong>R$250</strong> · Economize R$108 hoje
         </p>
         <button
-          onClick={() => navigate('/login')}
+          onClick={scrollToPrecos}
           className="shrink-0 bg-black text-amber text-[11px] font-extrabold uppercase tracking-widest px-4 py-1.5 rounded-full hover:bg-black/80 transition-all"
         >
           Garantir agora
@@ -225,7 +230,7 @@ const Index = () => {
             </p>
             <div className="flex flex-col sm:flex-row gap-4">
               <button
-                onClick={() => navigate('/login')}
+                onClick={scrollToPrecos}
                 className="btn-amber !w-auto px-10 h-16 text-base"
               >
                 Quero Parar de Perder Dinheiro <ArrowRight className="w-5 h-5" />
@@ -445,7 +450,7 @@ const Index = () => {
       </section>
 
       {/* ── PREÇOS ── */}
-      <section className="py-24 bg-amber">
+      <section ref={precosRef} className="py-24 bg-amber">
         <div className="max-w-[1180px] mx-auto px-6">
           <div className="text-center mb-14">
             <h2 className="font-montserrat font-extrabold text-4xl md:text-5xl text-black tracking-tighter mb-4">
@@ -553,7 +558,7 @@ const Index = () => {
             Centenas de profissionais já pararam de perder dinheiro com orçamento no olhômetro. A diferença entre eles e você é só um clique.
           </p>
           <button
-            onClick={() => navigate('/login')}
+            onClick={scrollToPrecos}
             className="btn-amber !w-auto px-12 h-16 text-lg mb-6"
           >
             Criar Minha Conta Agora <ArrowRight className="w-5 h-5" />
