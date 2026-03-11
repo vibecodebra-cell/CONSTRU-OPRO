@@ -73,9 +73,9 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
 
   return (
     <div className="min-h-screen flex flex-col">
-      <header className="glass-topbar h-18 px-4 sm:px-6 flex items-center gap-4">
+      <header className="glass-topbar px-6 sm:px-10 py-4 flex items-center gap-4">
         {/* Hamburger Button - Mobile Only */}
-        <button 
+        <button
           onClick={() => setIsMobileMenuOpen(true)}
           className="sm:hidden p-2 text-t-2 hover:text-t-1 transition-colors"
           aria-label="Abrir menu"
@@ -103,8 +103,8 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
                 aria-current={isActive ? 'page' : undefined}
                 className={cn(
                   "flex items-center gap-2 px-4 py-2 rounded-r-md text-[13px] font-bold uppercase tracking-wider transition-all",
-                  isActive 
-                    ? "text-black bg-amber shadow-amber-glow" 
+                  isActive
+                    ? "text-black bg-amber shadow-amber-glow"
                     : "text-t-2 hover:text-t-1 hover:bg-ink-tertiary"
                 )}
               >
@@ -117,7 +117,7 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
 
         <div className="ml-auto flex items-center gap-4">
           {/* Desktop Button */}
-          <button 
+          <button
             onClick={() => navigate('/new')}
             className="topbar-btn-novo hidden sm:flex items-center gap-2 bg-amber text-black font-montserrat font-extrabold text-[11px] uppercase tracking-widest px-5 py-2.5 rounded-r-md transition-all hover:bg-amber-hover hover:-translate-y-0.5 shadow-amber-glow"
           >
@@ -130,9 +130,9 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
       </header>
 
       {/* Mobile Menu Drawer */}
-      <MobileMenu 
-        isOpen={isMobileMenuOpen} 
-        onClose={() => setIsMobileMenuOpen(false)} 
+      <MobileMenu
+        isOpen={isMobileMenuOpen}
+        onClose={() => setIsMobileMenuOpen(false)}
         navItems={navItems}
       />
 
@@ -141,8 +141,8 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
       </main>
 
       {/* FAB Help */}
-      <button 
-        className="tour-fab" 
+      <button
+        className="tour-fab"
         data-has-tour={hasTour}
         onClick={handleHelpClick}
         title="Ajuda / Tutorial"
