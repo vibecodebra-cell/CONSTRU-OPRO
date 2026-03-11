@@ -501,7 +501,7 @@ const Index = () => {
                 onClick={() => navigate('/login')}
                 className="w-full py-5 bg-amber text-black font-montserrat font-extrabold text-sm uppercase tracking-widest rounded-r-md shadow-amber-glow hover:bg-amber-hover transition-all flex items-center justify-center gap-2"
               >
-                Assinar Anual — Economizar R$108 <ArrowRight className="w-4 h-4" />
+                Economizar R$108 <ArrowRight className="w-4 h-4" />
               </button>
             </div>
           </div>
