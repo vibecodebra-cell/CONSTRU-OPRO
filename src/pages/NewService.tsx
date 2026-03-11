@@ -5,6 +5,8 @@ import { useApp } from '../context/AppContext';
 import { Profession, Service } from '../types';
 import Toast from '../components/Toast';
 import MaterialsStep from '../components/newservice/MaterialsStep';
+import jsPDF from 'jspdf';
+import html2canvas from 'html2canvas';
 
 const NewService = () => {
   const navigate = useNavigate();
@@ -36,7 +38,6 @@ const NewService = () => {
   const updateFormData = (updates: Partial<Service>) => {
     setFormData(prev => {
       const newData = { ...prev, ...updates };
-      // Recalcula lucro e total sem alterar mão de obra
       const subtotal = (newData.totalMaterial || 0) + (newData.maoDeObra || 0) + (newData.custosExtras || 0);
       const lucroCalculado = subtotal * ((newData.margem || 0) / 100);
       newData.lucro = Math.round(lucroCalculado);
@@ -65,46 +66,38 @@ const NewService = () => {
   const handleGeneratePdf = async () => {
     if (!proposalRef.current) return;
     setGeneratingPdf(true);
-    try {
-      const { default: jsPDF } = await import('jspdf');
-      const { default: html2canvas } = await import('html2canvas');
 
-      const canvas = await html2canvas(proposalRef.current, {
-        scale: 2,
-        useCORS: true,
-        backgroundColor: '#ffffff',
-        logging: false,
-      });
+    const canvas = await html2canvas(proposalRef.current, {
+      scale: 2,
+      useCORS: true,
+      backgroundColor: '#ffffff',
+      logging: false,
+    });
 
-      const imgData = canvas.toDataURL('image/png');
-      const pdf = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
+    const imgData = canvas.toDataURL('image/png');
+    const pdf = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
 
-      const pageWidth = 210;
-      const pageHeight = 297;
-      const imgWidth = pageWidth;
-      const imgHeight = (canvas.height * pageWidth) / canvas.width;
+    const pageWidth = 210;
+    const pageHeight = 297;
+    const imgWidth = pageWidth;
+    const imgHeight = (canvas.height * pageWidth) / canvas.width;
 
-      let heightLeft = imgHeight;
-      let position = 0;
+    let heightLeft = imgHeight;
+    let position = 0;
 
+    pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+    heightLeft -= pageHeight;
+
+    while (heightLeft > 0) {
+      position = heightLeft - imgHeight;
+      pdf.addPage();
       pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
       heightLeft -= pageHeight;
-
-      while (heightLeft > 0) {
-        position = heightLeft - imgHeight;
-        pdf.addPage();
-        pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
-        heightLeft -= pageHeight;
-      }
-
-      pdf.save(`proposta-${formData.numero}-${selectedClient?.nome || 'cliente'}.pdf`);
-      setToast({ show: true, message: 'PDF gerado com sucesso!' });
-    } catch (err) {
-      console.error(err);
-      setToast({ show: true, message: 'Erro ao gerar PDF.' });
-    } finally {
-      setGeneratingPdf(false);
     }
+
+    pdf.save(`proposta-${formData.numero}-${selectedClient?.nome || 'cliente'}.pdf`);
+    setToast({ show: true, message: 'PDF gerado com sucesso!' });
+    setGeneratingPdf(false);
   };
 
   const handleShare = () => {
@@ -311,7 +304,6 @@ const NewService = () => {
                     onChange={(e) => updateFormData({ margem: +e.target.value })}
                     className="finput"
                   />
-                  {/* Slider visual */}
                   <input
                     type="range"
                     min={0}
@@ -362,110 +354,181 @@ const NewService = () => {
         {/* STEP 5 — Proposta */}
         {step === 5 && (
           <div className="max-w-[640px] mx-auto">
-            {/* Proposta A4 */}
-            <div
-              ref={proposalRef}
-              style={{ fontFamily: 'Arial, sans-serif', backgroundColor: '#ffffff', color: '#111', width: '794px', minHeight: '1123px', padding: '60px 56px', boxSizing: 'border-box' }}
-            >
-              {/* Cabeçalho */}
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '40px', borderBottom: '3px solid #F59E0B', paddingBottom: '24px' }}>
-                <div>
-                  <div style={{ fontWeight: 900, fontSize: '22px', letterSpacing: '-0.5px', color: '#F59E0B' }}>CONSTRUTOR PRO</div>
-                  <div style={{ fontSize: '11px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '2px', color: '#888', marginTop: '4px' }}>Proposta de Serviço</div>
-                  <div style={{ fontSize: '13px', fontWeight: 600, color: '#333', marginTop: '8px' }}>{profile.nome}</div>
-                  {profile.telefone && <div style={{ fontSize: '12px', color: '#666', marginTop: '2px' }}>📞 {profile.telefone}</div>}
-                  {profile.cidade && <div style={{ fontSize: '12px', color: '#666', marginTop: '2px' }}>📍 {profile.cidade}{profile.estado ? `, ${profile.estado}` : ''}</div>}
-                </div>
-                <div style={{ textAlign: 'right' }}>
-                  <div style={{ fontSize: '28px', fontWeight: 900, color: '#111' }}>#{formData.numero}</div>
-                  <div style={{ fontSize: '11px', color: '#888', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '1px', marginTop: '4px' }}>
-                    {new Date().toLocaleDateString('pt-BR', { day: '2-digit', month: 'long', year: 'numeric' })}
+            {/* Proposta A4 — renderizada fora da tela para captura */}
+            <div style={{ position: 'fixed', top: '-9999px', left: '-9999px', zIndex: -1 }}>
+              <div
+                ref={proposalRef}
+                style={{ fontFamily: 'Arial, sans-serif', backgroundColor: '#ffffff', color: '#111', width: '794px', minHeight: '1123px', padding: '60px 56px', boxSizing: 'border-box' }}
+              >
+                {/* Cabeçalho */}
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '40px', borderBottom: '3px solid #F59E0B', paddingBottom: '24px' }}>
+                  <div>
+                    <div style={{ fontWeight: 900, fontSize: '22px', letterSpacing: '-0.5px', color: '#F59E0B' }}>CONSTRUTOR PRO</div>
+                    <div style={{ fontSize: '11px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '2px', color: '#888', marginTop: '4px' }}>Proposta de Serviço</div>
+                    <div style={{ fontSize: '13px', fontWeight: 600, color: '#333', marginTop: '8px' }}>{profile.nome}</div>
+                    {profile.telefone && <div style={{ fontSize: '12px', color: '#666', marginTop: '2px' }}>Tel: {profile.telefone}</div>}
+                    {profile.cidade && <div style={{ fontSize: '12px', color: '#666', marginTop: '2px' }}>{profile.cidade}{profile.estado ? `, ${profile.estado}` : ''}</div>}
                   </div>
-                  <div style={{ marginTop: '10px', display: 'inline-block', background: '#FEF3C7', color: '#92400E', fontSize: '10px', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '1.5px', padding: '4px 10px', borderRadius: '99px' }}>
-                    Válida por {formData.validade} dias
+                  <div style={{ textAlign: 'right' }}>
+                    <div style={{ fontSize: '28px', fontWeight: 900, color: '#111' }}>#{formData.numero}</div>
+                    <div style={{ fontSize: '11px', color: '#888', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '1px', marginTop: '4px' }}>
+                      {new Date().toLocaleDateString('pt-BR', { day: '2-digit', month: 'long', year: 'numeric' })}
+                    </div>
+                    <div style={{ marginTop: '10px', display: 'inline-block', background: '#FEF3C7', color: '#92400E', fontSize: '10px', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '1.5px', padding: '4px 10px', borderRadius: '99px' }}>
+                      Validade: {formData.validade} dias
+                    </div>
                   </div>
                 </div>
-              </div>
 
-              {/* Cliente e Serviço */}
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '32px', marginBottom: '36px' }}>
-                <div style={{ background: '#F9FAFB', borderRadius: '10px', padding: '20px' }}>
-                  <div style={{ fontSize: '10px', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '2px', color: '#9CA3AF', marginBottom: '10px' }}>Cliente</div>
-                  <div style={{ fontWeight: 700, fontSize: '16px', color: '#111' }}>{selectedClient?.nome || 'Não informado'}</div>
-                  {selectedClient?.telefone && <div style={{ fontSize: '13px', color: '#555', marginTop: '4px' }}>📞 {selectedClient.telefone}</div>}
-                  {selectedClient?.email && <div style={{ fontSize: '13px', color: '#555', marginTop: '2px' }}>✉️ {selectedClient.email}</div>}
-                  {selectedClient?.cidade && <div style={{ fontSize: '13px', color: '#555', marginTop: '2px' }}>📍 {selectedClient.cidade}</div>}
+                {/* Cliente e Serviço */}
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '32px', marginBottom: '36px' }}>
+                  <div style={{ background: '#F9FAFB', borderRadius: '10px', padding: '20px' }}>
+                    <div style={{ fontSize: '10px', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '2px', color: '#9CA3AF', marginBottom: '10px' }}>Cliente</div>
+                    <div style={{ fontWeight: 700, fontSize: '16px', color: '#111' }}>{selectedClient?.nome || 'Não informado'}</div>
+                    {selectedClient?.telefone && <div style={{ fontSize: '13px', color: '#555', marginTop: '4px' }}>Tel: {selectedClient.telefone}</div>}
+                    {selectedClient?.email && <div style={{ fontSize: '13px', color: '#555', marginTop: '2px' }}>{selectedClient.email}</div>}
+                    {selectedClient?.cidade && <div style={{ fontSize: '13px', color: '#555', marginTop: '2px' }}>{selectedClient.cidade}</div>}
+                  </div>
+                  <div style={{ background: '#F9FAFB', borderRadius: '10px', padding: '20px' }}>
+                    <div style={{ fontSize: '10px', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '2px', color: '#9CA3AF', marginBottom: '10px' }}>Servico</div>
+                    <div style={{ fontWeight: 700, fontSize: '16px', color: '#111' }}>{formData.tipoServico}</div>
+                    <div style={{ fontSize: '13px', color: '#555', marginTop: '4px', textTransform: 'capitalize' }}>{formData.profissao}</div>
+                    {formData.endereco && <div style={{ fontSize: '13px', color: '#555', marginTop: '4px' }}>{formData.endereco}</div>}
+                    {formData.dataInicio && <div style={{ fontSize: '13px', color: '#555', marginTop: '4px' }}>Inicio: {new Date(formData.dataInicio + 'T00:00:00').toLocaleDateString('pt-BR')}</div>}
+                  </div>
                 </div>
-                <div style={{ background: '#F9FAFB', borderRadius: '10px', padding: '20px' }}>
-                  <div style={{ fontSize: '10px', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '2px', color: '#9CA3AF', marginBottom: '10px' }}>Serviço</div>
-                  <div style={{ fontWeight: 700, fontSize: '16px', color: '#111' }}>{formData.tipoServico}</div>
-                  <div style={{ fontSize: '13px', color: '#555', marginTop: '4px', textTransform: 'capitalize' }}>👷 {formData.profissao}</div>
-                  {formData.endereco && <div style={{ fontSize: '13px', color: '#555', marginTop: '4px' }}>📍 {formData.endereco}</div>}
-                  {formData.dataInicio && <div style={{ fontSize: '13px', color: '#555', marginTop: '4px' }}>📅 Início: {new Date(formData.dataInicio + 'T00:00:00').toLocaleDateString('pt-BR')}</div>}
-                </div>
-              </div>
 
-              {/* Composição de Valores */}
-              <div style={{ marginBottom: '32px' }}>
-                <div style={{ fontSize: '11px', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '2px', color: '#9CA3AF', marginBottom: '14px' }}>Composição de Valores</div>
-                <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-                  <tbody>
-                    {[
-                      ['Materiais', formData.totalMaterial || 0],
-                      ['Mão de Obra e Execução', formData.maoDeObra || 0],
-                      ...(formData.custosExtras ? [['Custos Adicionais', formData.custosExtras]] : []),
-                    ].map(([label, value], i) => (
-                      <tr key={i} style={{ borderBottom: '1px solid #E5E7EB' }}>
-                        <td style={{ padding: '12px 0', fontSize: '14px', color: '#374151' }}>{label as string}</td>
-                        <td style={{ padding: '12px 0', fontSize: '14px', fontWeight: 600, textAlign: 'right', color: '#111' }}>
-                          R$ {(value as number).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                {/* Composição de Valores */}
+                <div style={{ marginBottom: '32px' }}>
+                  <div style={{ fontSize: '11px', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '2px', color: '#9CA3AF', marginBottom: '14px' }}>Composicao de Valores</div>
+                  <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                    <tbody>
+                      {[
+                        ['Materiais', formData.totalMaterial || 0],
+                        ['Mao de Obra e Execucao', formData.maoDeObra || 0],
+                        ...(formData.custosExtras ? [['Custos Adicionais', formData.custosExtras]] : []),
+                      ].map(([label, value], i) => (
+                        <tr key={i} style={{ borderBottom: '1px solid #E5E7EB' }}>
+                          <td style={{ padding: '12px 0', fontSize: '14px', color: '#374151' }}>{label as string}</td>
+                          <td style={{ padding: '12px 0', fontSize: '14px', fontWeight: 600, textAlign: 'right', color: '#111' }}>
+                            R$ {(value as number).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                          </td>
+                        </tr>
+                      ))}
+                      <tr>
+                        <td style={{ padding: '18px 0 8px', fontSize: '16px', fontWeight: 900, color: '#111' }}>VALOR TOTAL DA OBRA</td>
+                        <td style={{ padding: '18px 0 8px', fontSize: '28px', fontWeight: 900, textAlign: 'right', color: '#F59E0B' }}>
+                          R$ {(formData.totalFinal || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
                         </td>
                       </tr>
-                    ))}
-                    <tr>
-                      <td style={{ padding: '18px 0 8px', fontSize: '16px', fontWeight: 900, color: '#111' }}>VALOR TOTAL DA OBRA</td>
-                      <td style={{ padding: '18px 0 8px', fontSize: '28px', fontWeight: 900, textAlign: 'right', color: '#F59E0B' }}>
-                        R$ {(formData.totalFinal || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
-                      </td>
-                    </tr>
-                  </tbody>
-                </table>
-              </div>
-
-              {/* Condições */}
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '16px', marginBottom: '36px' }}>
-                {[
-                  ['⏱️ Prazo de Entrega', `${formData.prazoCliente} dias úteis`],
-                  ['🛡️ Garantia', formData.garantia || '—'],
-                  ['💳 Pagamento', formData.formaPagamento || '—'],
-                ].map(([label, value], i) => (
-                  <div key={i} style={{ background: '#F9FAFB', borderRadius: '10px', padding: '16px' }}>
-                    <div style={{ fontSize: '11px', fontWeight: 700, color: '#9CA3AF', marginBottom: '6px' }}>{label}</div>
-                    <div style={{ fontSize: '14px', fontWeight: 700, color: '#111' }}>{value}</div>
-                  </div>
-                ))}
-              </div>
-
-              {/* Rodapé */}
-              <div style={{ borderTop: '2px solid #F3F4F6', paddingTop: '24px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <div style={{ fontSize: '11px', color: '#9CA3AF', fontWeight: 600 }}>
-                  Proposta gerada pelo <strong style={{ color: '#F59E0B' }}>Construtor Pro</strong>
+                    </tbody>
+                  </table>
                 </div>
-                <div style={{ fontSize: '11px', color: '#9CA3AF' }}>
-                  Esta proposta é válida por {formData.validade} dias a partir da data de emissão.
+
+                {/* Condições */}
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '16px', marginBottom: '36px' }}>
+                  {[
+                    ['Prazo de Entrega', `${formData.prazoCliente} dias uteis`],
+                    ['Garantia', formData.garantia || '-'],
+                    ['Pagamento', formData.formaPagamento || '-'],
+                  ].map(([label, value], i) => (
+                    <div key={i} style={{ background: '#F9FAFB', borderRadius: '10px', padding: '16px' }}>
+                      <div style={{ fontSize: '11px', fontWeight: 700, color: '#9CA3AF', marginBottom: '6px' }}>{label}</div>
+                      <div style={{ fontSize: '14px', fontWeight: 700, color: '#111' }}>{value}</div>
+                    </div>
+                  ))}
+                </div>
+
+                {/* Rodapé */}
+                <div style={{ borderTop: '2px solid #F3F4F6', paddingTop: '24px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <div style={{ fontSize: '11px', color: '#9CA3AF', fontWeight: 600 }}>
+                    Proposta gerada pelo Construtor Pro
+                  </div>
+                  <div style={{ fontSize: '11px', color: '#9CA3AF' }}>
+                    Valida por {formData.validade} dias a partir da emissao.
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Preview da proposta visível ao usuário */}
+            <div className="bg-white text-black rounded-r-lg shadow-pop overflow-hidden mb-6">
+              <div className="bg-amber px-8 py-5 flex justify-between items-center">
+                <div>
+                  <div className="font-montserrat font-extrabold text-xl text-black tracking-tight">CONSTRUTOR PRO</div>
+                  <div className="text-black/60 text-[11px] font-bold uppercase tracking-widest">Proposta de Serviço</div>
+                </div>
+                <div className="text-right">
+                  <div className="font-montserrat font-extrabold text-3xl text-black">#{formData.numero}</div>
+                  <div className="text-black/60 text-[11px] font-bold">{new Date().toLocaleDateString('pt-BR')}</div>
+                </div>
+              </div>
+              <div className="p-8 space-y-6">
+                <div className="grid grid-cols-2 gap-6">
+                  <div className="bg-gray-50 rounded-lg p-4">
+                    <div className="text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-2">Cliente</div>
+                    <div className="font-bold text-gray-900">{selectedClient?.nome || 'Não selecionado'}</div>
+                    {selectedClient?.telefone && <div className="text-sm text-gray-500 mt-1">{selectedClient.telefone}</div>}
+                    {selectedClient?.cidade && <div className="text-sm text-gray-500">{selectedClient.cidade}</div>}
+                  </div>
+                  <div className="bg-gray-50 rounded-lg p-4">
+                    <div className="text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-2">Serviço</div>
+                    <div className="font-bold text-gray-900">{formData.tipoServico}</div>
+                    <div className="text-sm text-gray-500 mt-1 capitalize">{formData.profissao}</div>
+                    {formData.endereco && <div className="text-sm text-gray-500">{formData.endereco}</div>}
+                  </div>
+                </div>
+
+                <div className="border-t border-gray-100 pt-4 space-y-2">
+                  <div className="flex justify-between text-sm text-gray-600 py-1.5 border-b border-gray-100">
+                    <span>Materiais</span>
+                    <span className="font-semibold text-gray-900">R$ {fmt(formData.totalMaterial || 0)}</span>
+                  </div>
+                  <div className="flex justify-between text-sm text-gray-600 py-1.5 border-b border-gray-100">
+                    <span>Mão de Obra</span>
+                    <span className="font-semibold text-gray-900">R$ {fmt(formData.maoDeObra || 0)}</span>
+                  </div>
+                  {(formData.custosExtras || 0) > 0 && (
+                    <div className="flex justify-between text-sm text-gray-600 py-1.5 border-b border-gray-100">
+                      <span>Custos Adicionais</span>
+                      <span className="font-semibold text-gray-900">R$ {fmt(formData.custosExtras || 0)}</span>
+                    </div>
+                  )}
+                  <div className="flex justify-between items-center pt-3">
+                    <span className="font-montserrat font-extrabold text-sm uppercase tracking-wider text-gray-800">Valor Total</span>
+                    <span className="font-montserrat font-extrabold text-3xl text-amber-500" style={{ color: '#F59E0B' }}>
+                      R$ {fmt(formData.totalFinal || 0)}
+                    </span>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-3 gap-3">
+                  {[
+                    ['Prazo', `${formData.prazoCliente} dias`],
+                    ['Garantia', formData.garantia || '—'],
+                    ['Pagamento', formData.formaPagamento || '—'],
+                  ].map(([label, value], i) => (
+                    <div key={i} className="bg-gray-50 rounded-lg p-3 text-center">
+                      <div className="text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-1">{label}</div>
+                      <div className="text-sm font-bold text-gray-800">{value}</div>
+                    </div>
+                  ))}
                 </div>
               </div>
             </div>
 
             {/* Botões */}
-            <div className="grid grid-cols-2 gap-4 mt-6">
+            <div className="grid grid-cols-2 gap-4">
               <button
                 onClick={handleGeneratePdf}
                 disabled={generatingPdf}
                 className="btn-blue h-14 disabled:opacity-60"
               >
                 {generatingPdf ? (
-                  <span className="flex items-center gap-2"><span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" /> Gerando...</span>
+                  <span className="flex items-center gap-2">
+                    <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                    Gerando...
+                  </span>
                 ) : (
                   <><FileDown className="w-4 h-4" /> Gerar PDF</>
                 )}
