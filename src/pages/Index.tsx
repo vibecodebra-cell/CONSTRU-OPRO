@@ -501,7 +501,7 @@ const Index = () => {
                 ))}
               </ul>
               <button
-                onClick={() => navigate('/login')}
+                onClick={() => window.open('https://www.ggcheckout.com/checkout/v5/qopaddkQXhgCV9q7C34J', '_blank')}
                 className="w-full py-5 bg-amber text-black font-montserrat font-extrabold text-sm uppercase tracking-widest rounded-r-md shadow-amber-glow hover:bg-amber-hover transition-all flex items-center justify-center gap-2"
               >
                 <a href="https://www.ggcheckout.com/checkout/v5/qopaddkQXhgCV9q7C34J" target="_blank" rel="noopener noreferrer">Economizar R$108</a><ArrowRight className="w-4 h-4" />
